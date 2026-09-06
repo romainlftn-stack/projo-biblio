@@ -21,7 +21,7 @@ const STEPS = [
     d: 'Faites glisser une planche pour la déplacer. Sélectionnée, elle s’entoure de flèches qui pointent dans le sens où on peut les tirer :',
     list: [
       ['Flèches jaunes des deux bouts', 'allongent ou raccourcissent la planche.'],
-      ['Flèche turquoise devant', 'tire ou pousse la profondeur.'],
+      ['Repère bleuté devant', 'tire ou pousse la profondeur de la planche.'],
       ['Flèche jaune du dessus', 'sur un cadre, règle sa hauteur. Les objets de déco gardent leur taille : ce sont des étalons, le catalogue en propose plusieurs formats.'],
       ['Champs du panneau', 'donnent la taille exacte au centimètre, et la hauteur depuis le sol.'],
     ],

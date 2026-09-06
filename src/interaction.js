@@ -25,8 +25,19 @@ function chevronTexture(glyph, rot, color) {
   x.rotate(rot);
   x.lineCap = 'round';
   x.lineJoin = 'round';
-  const paths = glyph === 'double'
-    ? [[[0, -40], [0, 40]], [[-17, -23], [0, -40], [17, -23]], [[-17, 23], [0, 40], [17, 23]]]
+  /*
+   * Profondeur : une double flèche alignée sur l'axe réel devenait verticale
+   * vu de face, où cet axe pointe vers la caméra — on croyait pouvoir monter
+   * ou descendre la planche. Le pictogramme est donc fixe et littéral : le
+   * mur à gauche, la planche en débord, et la cote qu'on règle en dessous.
+   */
+  const paths = glyph === 'depth'
+    ? [
+        [[-46, -42], [-46, 42]],              // le mur, vu de profil
+        [[-30, 0], [46, 0]],                  // la cote qui s'en éloigne
+        [[-16, -15], [-30, 0], [-16, 15]],    // pointe côté mur
+        [[32, -15], [46, 0], [32, 15]],       // pointe côté pièce
+      ]
     : [[[-16, -30], [18, 0], [-16, 30]]];
   for (const pass of [{ w: 24, c: 'rgba(18,14,11,.5)' }, { w: 13, c: '#' + color.toString(16).padStart(6, '0') }]) {
     x.lineWidth = pass.w;
@@ -161,7 +172,7 @@ export class Interaction {
       ['left',  'chevron', Math.PI, 0xffc857],
       ['right', 'chevron', 0, 0xffc857],
       ['top',   'chevron', -Math.PI / 2, 0xffc857],
-      ['depth', 'double', 0, 0x4fd6c2],
+      ['depth', 'depth', 0, 0x9dbecd],
     ];
     for (const [key, glyph, rot, color] of specs) {
       const sp = new THREE.Sprite(new THREE.SpriteMaterial({
@@ -212,12 +223,6 @@ export class Interaction {
     for (const m of this.handles.children) {
       const s = this.handlePx * k * this.camera.position.distanceTo(m.position);
       m.scale.set(s, s, 1);
-    }
-    // La double flèche suit l'axe de profondeur tel qu'il se projette à l'écran.
-    const depth = this.handleMeshes.depth;
-    if (depth?.visible) {
-      const ax = this.depthAxis(depth.position);
-      depth.material.rotation = Math.atan2(-ax.x, -ax.y);
     }
   }
 
