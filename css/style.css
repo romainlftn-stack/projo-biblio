@@ -246,13 +246,12 @@ kbd {
 
 /* ------------------------------------------- plein écran, navigation seule */
 
-/* Bouton plein écran : assez présent pour qu'on le trouve. */
+/* Bouton plein écran : pas d'encadré, mais un symbole assez grand pour se voir. */
 .tool--full {
-  display: inline-flex; align-items: center; gap: 6px;
-  border: 1px solid var(--wood); color: var(--wood);
+  display: grid; place-items: center;
+  width: 30px; height: 30px; padding: 0;
+  font-size: 19px; line-height: 1;
 }
-.tool--full:hover { background: var(--wood); color: #221b13; }
-.full-icon { font-size: 14px; line-height: 1; }
 
 /* Sortie du plein écran : une croix, rien d'autre. */
 .tool--exit {
@@ -368,10 +367,13 @@ body.is-nav .nav-hint { color: rgba(236,231,223,.6); }
   .toolbar-top .toolbar--measure {
     padding-left: 5px; margin-left: 3px; border-left: 1px solid var(--line);
   }
-  .toolbar-top .tool { flex: none; padding: 6px 9px; }
+  /* Les vues se répartissent la largeur restante plutôt que de se tasser
+     à gauche ; les deux bascules gardent leur gabarit fixe à droite. */
+  .toolbar-top .toolbar--views { flex: 1 1 auto; min-width: 0; }
+  .toolbar-top .toolbar--views .tool { flex: 1 1 0; min-width: 0; padding: 6px 3px; font-size: 11.5px; }
+  .toolbar-top .toolbar--measure { flex: none; }
   .lbl-long { display: none; }
   .lbl-short { display: inline; }
-  .tool--full { padding: 6px 10px; }
 
   /* Plein écran sur mobile : l'écran est petit, on le laisse entier. */
   body.is-nav .toolbar-top { display: none; }
@@ -394,5 +396,5 @@ body.is-nav .nav-hint { color: rgba(236,231,223,.6); }
 /* Écrans très étroits : deux réglages de plus pour ne rien tronquer. */
 @media (max-width: 400px) {
   .bank { grid-template-columns: 1fr; }
-  .toolbar-top .tool { padding: 6px 7px; }
+  .toolbar-top .toolbar--views .tool { padding: 6px 2px; font-size: 11px; }
 }
