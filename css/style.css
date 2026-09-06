@@ -71,7 +71,7 @@ html, body {
 .tab:hover { color: var(--text); }
 .tab.is-active { color: var(--accent); border-bottom-color: var(--accent); }
 
-.panel-body { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+.panel-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
 .panel-body::-webkit-scrollbar { width: 9px; }
 .panel-body::-webkit-scrollbar-thumb { background: #37302a; border-radius: 9px; }
 
@@ -168,7 +168,7 @@ kbd {
 
 /* ------------------------------------------------------------ scène */
 
-#stage { position: relative; flex: 1; min-width: 0; }
+#stage { position: relative; flex: 1; min-width: 0; min-height: 0; }
 #scene { display: block; width: 100%; height: 100%; touch-action: none; }
 
 .labels-layer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
@@ -257,6 +257,17 @@ body.is-nav .nav-hint { color: rgba(236,231,223,.6); }
 
 @media (max-width: 900px) {
   #app { flex-direction: column-reverse; }
-  #panel { width: 100%; flex: 0 0 46vh; border-right: 0; border-top: 1px solid var(--line); }
-  .toolbar--views { flex-wrap: wrap; justify-content: center; }
+  #panel {
+    width: 100%; flex: 0 0 52vh; max-height: 52vh;
+    border-right: 0; border-top: 1px solid var(--line);
+  }
+  #stage { flex: 1 1 48vh; min-height: 48vh; }
+  .panel-head { padding: 10px 12px 8px; }
+  .panel-foot { padding: 9px 12px; }
+  .dropzone { padding: 8px 10px; }
+  .dropzone span { display: none; }
+  .bank { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .toolbar--views { flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 28px); }
+  .toolbar--edit { top: auto; bottom: 12px; right: 12px; }
+  .nav-hint { display: none; }
 }
