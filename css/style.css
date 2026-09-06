@@ -215,12 +215,10 @@ kbd {
 .tool--toggle, .tool--icon { padding: 6px; width: 30px; height: 30px; display: grid; place-items: center; }
 .tool--toggle svg, .tool--icon svg {
   width: 16px; height: 16px; fill: none; stroke: currentColor;
-  stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round;
+  /* Trait et grille identiques pour toutes les icônes : chaque dessin est
+     inscrit dans le carré 3..13 du viewBox, elles font donc la même hauteur. */
+  stroke-width: 1.45; stroke-linecap: round; stroke-linejoin: round;
 }
-/* L'appareil photo porte beaucoup de détail : un trait plus fin l'allège.
-   Annuler / rétablir sont deux traits isolés : ils ont besoin d'être épais. */
-#btn-shot svg { stroke-width: 1.1; }
-.tool--history svg { stroke-width: 1.95; }
 .tool--toggle.is-active { background: rgba(181, 86, 58, .26); color: #eda87f; }
 .tool--toggle.is-active:hover { background: rgba(181, 86, 58, .36); }
 
@@ -250,12 +248,7 @@ kbd {
 
 /* ------------------------------------------- plein écran, navigation seule */
 
-/* Bouton plein écran : pas d'encadré, mais un symbole assez grand pour se voir. */
-.tool--full {
-  display: grid; place-items: center;
-  width: 30px; height: 30px; padding: 0;
-  font-size: 19px; line-height: 1;
-}
+
 
 /* Sortie du plein écran : une croix, rien d'autre. */
 .tool--exit {
