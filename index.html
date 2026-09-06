@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projo Biblio — projection étagères, salon</title>
+<meta name="description" content="Outil de projection 3D pour placer des étagères sur le mur rouge du salon.">
+<link rel="stylesheet" href="./css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%238a4630'/><g fill='%23b98a52'><rect x='5' y='9' width='16' height='3' rx='1'/><rect x='11' y='16' width='16' height='3' rx='1'/><rect x='5' y='23' width='12' height='3' rx='1'/></g></svg>">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.168.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<div id="app">
+
+  <aside id="panel" aria-label="Panneau de travail">
+    <header class="panel-head">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <h1>Projo Biblio</h1>
+          <input id="proj-name" class="proj-name" value="Nouvelle projection" aria-label="Nom de la projection">
+        </div>
+      </div>
+      <button id="btn-help" class="icon-btn" title="Revoir le mode d'emploi" aria-label="Aide">?</button>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab is-active" data-tab="shelf" role="tab">Étagères</button>
+      <button class="tab" data-tab="frame" role="tab">Cadres</button>
+      <button class="tab" data-tab="object" role="tab">Objets</button>
+    </nav>
+
+    <div class="panel-body">
+      <section id="bank" class="bank" aria-label="Banque d'éléments"></section>
+
+      <section id="inspector" class="inspector" hidden aria-label="Réglages de la sélection"></section>
+
+      <section class="block">
+        <h2>Repères</h2>
+        <label class="switch"><input type="checkbox" id="opt-dims"><span></span>Toutes les cotes en cm</label>
+        <label class="switch"><input type="checkbox" id="opt-studs"><span></span>Montants placo (entraxe 60)</label>
+        <label class="switch"><input type="checkbox" id="opt-ruler"><span></span>Règle des hauteurs</label>
+        <label class="switch"><input type="checkbox" id="opt-decor" checked><span></span>Mobilier du salon</label>
+        <label class="switch"><input type="checkbox" id="opt-art" checked><span></span>Tableaux déjà en place</label>
+        <p class="hint">Décoché, seule la pièce sélectionnée affiche sa cote.</p>
+      </section>
+
+      <section class="block">
+        <h2>Aimantation</h2>
+        <label class="switch"><input type="checkbox" id="opt-grid" checked><span></span>Grille 5 cm</label>
+        <label class="switch"><input type="checkbox" id="opt-align" checked><span></span>Alignement entre planches</label>
+        <label class="switch"><input type="checkbox" id="opt-snapstuds" checked><span></span>Se caler sur les montants</label>
+        <p class="hint">Maintenir <kbd>Alt</kbd> en déplaçant pour ignorer les aimants.</p>
+      </section>
+
+      <section class="block" id="recap-block">
+        <h2>Récapitulatif</h2>
+        <div id="recap" class="recap"></div>
+      </section>
+    </div>
+
+    <footer class="panel-foot">
+      <div id="dropzone" class="dropzone">
+        <strong>Charger une projection</strong>
+        <span>Glissez ici votre fichier <code>.json</code></span>
+        <input type="file" id="file-input" accept="application/json,.json" hidden>
+      </div>
+      <div class="foot-actions">
+        <button id="btn-save" class="btn btn-primary">Enregistrer</button>
+        <button id="btn-open" class="btn">Ouvrir…</button>
+        <button id="btn-clear" class="btn btn-ghost">Vider</button>
+      </div>
+    </footer>
+  </aside>
+
+  <main id="stage">
+    <canvas id="scene"></canvas>
+    <div id="labels" class="labels-layer"></div>
+
+    <div class="toolbar toolbar--views" role="group" aria-label="Vues">
+      <button class="tool" data-view="face">Face</button>
+      <button class="tool" data-view="large">Large</button>
+      <button class="tool" data-view="gauche">¾ gauche</button>
+      <button class="tool" data-view="droite">¾ droite</button>
+      <button class="tool" data-view="rasante">Rasante</button>
+    </div>
+
+    <div class="toolbar toolbar--edit" role="group" aria-label="Édition">
+      <button class="tool" id="btn-undo" title="Annuler (Cmd+Z)">↶</button>
+      <button class="tool" id="btn-redo" title="Rétablir (Cmd+Maj+Z)">↷</button>
+      <button class="tool" id="btn-shot" title="Exporter une image">Image</button>
+      <button class="tool" id="btn-full" title="Plein écran — navigation seule">⤢</button>
+    </div>
+
+    <button id="btn-exit-full" class="tool tool--exit" hidden>Quitter le plein écran (Échap)</button>
+
+    <div id="warnings" class="warnings" hidden></div>
+    <div id="toast" class="toast" hidden></div>
+
+    <p class="nav-hint">
+      Clic gauche&nbsp;: pivoter · Clic droit&nbsp;: translater · Molette&nbsp;: avancer / reculer
+    </p>
+  </main>
+</div>
+
+<div id="tour" class="tour" hidden></div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
