@@ -196,7 +196,10 @@ kbd {
   background: rgba(24,20,17,.86); border: 1px solid var(--line);
   border-radius: 9px; backdrop-filter: blur(8px);
 }
+/* Sur grand écran, chaque barre garde son ancrage propre. */
+.toolbar-top { display: contents; }
 .toolbar--measure { top: 14px; left: 14px; }
+.lbl-short { display: none; }
 .toolbar--views { top: 14px; left: 50%; transform: translateX(-50%); }
 .toolbar--edit { top: 14px; right: 14px; }
 .tool {
@@ -209,10 +212,10 @@ kbd {
 
 /* Bascules d'affichage : une icône et un état actif teinté plutôt qu'un aplat
    plein, qui pesait trop lourd dès que les deux étaient allumées. */
-.tool--toggle { padding: 6px; width: 30px; height: 30px; display: grid; place-items: center; }
-.tool--toggle svg {
+.tool--toggle, .tool--icon { padding: 6px; width: 30px; height: 30px; display: grid; place-items: center; }
+.tool--toggle svg, .tool--icon svg {
   width: 16px; height: 16px; fill: none; stroke: currentColor;
-  stroke-width: 1.4; stroke-linecap: round;
+  stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round;
 }
 .tool--toggle.is-active { background: rgba(181, 86, 58, .26); color: #eda87f; }
 .tool--toggle.is-active:hover { background: rgba(181, 86, 58, .36); }
@@ -243,12 +246,27 @@ kbd {
 
 /* ------------------------------------------- plein écran, navigation seule */
 
+/* Bouton plein écran : assez présent pour qu'on le trouve. */
+.tool--full {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--wood); color: var(--wood);
+}
+.tool--full:hover { background: var(--wood); color: #221b13; }
+.full-icon { font-size: 14px; line-height: 1; }
+
+/* Sortie du plein écran : une croix, rien d'autre. */
 .tool--exit {
-  position: absolute; top: 14px; right: 14px;
-  background: rgba(24,20,17,.86); border: 1px solid var(--line);
+  position: absolute; z-index: 8;
+  top: calc(14px + env(safe-area-inset-top));
+  right: calc(14px + env(safe-area-inset-right));
+  width: 38px; height: 38px; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer;
+  border: 1px solid var(--line); background: rgba(24,20,17,.9);
+  color: var(--text); font: inherit; font-size: 21px; line-height: 1;
   backdrop-filter: blur(8px);
 }
-.tool--exit:hover { background: var(--terra); color: #fff; }
+.tool--exit[hidden] { display: none; }
+.tool--exit:hover { background: var(--terra); border-color: var(--terra); color: #fff; }
 
 body.is-nav #panel,
 body.is-nav .toolbar--measure,
@@ -327,15 +345,36 @@ body.is-nav .nav-hint { color: rgba(236,231,223,.6); }
   }
   body.panel-open .mob-btn, body.is-nav .mob-btn { display: none; }
 
-  /* Les vues défilent latéralement plutôt que de se replier sur deux étages. */
-  .toolbar--views {
-    top: calc(8px + env(safe-area-inset-top)); left: 8px; right: 8px;
-    transform: none; justify-content: flex-start;
+  /* Tout tient sur une seule ligne en haut : les vues, puis les bascules
+     d'affichage. « ¾ gauche / droite » s'abrègent pour que ça passe. */
+  .toolbar-top {
+    display: flex; align-items: center; gap: 4px;
+    position: absolute; z-index: 5;
+    top: calc(8px + env(safe-area-inset-top));
+    left: calc(8px + env(safe-area-inset-left));
+    right: calc(8px + env(safe-area-inset-right));
+    padding: 4px; border-radius: 9px;
+    background: rgba(24, 20, 17, .86); border: 1px solid var(--line);
+    backdrop-filter: blur(8px);
     overflow-x: auto; scrollbar-width: none;
   }
-  .toolbar--views::-webkit-scrollbar { display: none; }
-  .toolbar--views .tool { flex: none; }
-  .toolbar--measure { top: calc(58px + env(safe-area-inset-top)); left: 8px; }
+  .toolbar-top::-webkit-scrollbar { display: none; }
+  .toolbar-top .toolbar {
+    /* `transform` survit au passage en `position: static` : sans ce reset, la
+       barre des vues garde son centrage desktop et sort du bandeau. */
+    position: static; transform: none; flex: none; padding: 0; gap: 2px;
+    background: none; border: 0; border-radius: 0; backdrop-filter: none;
+  }
+  .toolbar-top .toolbar--measure {
+    padding-left: 5px; margin-left: 3px; border-left: 1px solid var(--line);
+  }
+  .toolbar-top .tool { flex: none; padding: 6px 9px; }
+  .lbl-long { display: none; }
+  .lbl-short { display: inline; }
+  .tool--full { padding: 6px 10px; }
+
+  /* Plein écran sur mobile : l'écran est petit, on le laisse entier. */
+  body.is-nav .toolbar-top { display: none; }
   .toolbar--edit {
     top: auto; bottom: calc(14px + env(safe-area-inset-bottom));
     right: calc(10px + env(safe-area-inset-right));
@@ -355,5 +394,5 @@ body.is-nav .nav-hint { color: rgba(236,231,223,.6); }
 /* Écrans très étroits : deux réglages de plus pour ne rien tronquer. */
 @media (max-width: 400px) {
   .bank { grid-template-columns: 1fr; }
-  .toolbar--measure .tool { padding: 6px; }
+  .toolbar-top .tool { padding: 6px 7px; }
 }

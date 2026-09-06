@@ -107,7 +107,13 @@ export function initTour() {
   root.addEventListener('click', (e) => { if (e.target === root) close(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !root.hidden) close(); });
 
-  const open = () => { root.hidden = false; ok.focus(); };
+  const open = () => {
+    root.hidden = false;
+    // Sur mobile la carte défile : focaliser le bouton final la ferait
+    // s'ouvrir sur sa dernière étape.
+    card.scrollTop = 0;
+    ok.focus({ preventScroll: true });
+  };
   document.getElementById('btn-help').addEventListener('click', open);
 
   if (!tourSeen()) open();

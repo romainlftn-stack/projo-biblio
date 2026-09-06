@@ -108,27 +108,31 @@
     <canvas id="scene"></canvas>
     <div id="labels" class="labels-layer"></div>
 
-    <div class="toolbar toolbar--measure">
-      <button class="tool tool--toggle" id="btn-dims" aria-pressed="false" aria-label="Afficher les mesures" title="Afficher les mesures"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="5" width="14" height="6" rx="1.2"/><path d="M4 5v2.4M6.5 5v1.6M9 5v2.4M11.5 5v1.6"/></svg></button>
-      <button class="tool tool--toggle" id="btn-shadows" aria-pressed="true" aria-label="Masquer les ombres" title="Masquer les ombres"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.2"/><path d="M8 1v1.6M8 13.4V15M1 8h1.6M13.4 8H15M3.1 3.1l1.1 1.1M11.8 11.8l1.1 1.1M12.9 3.1l-1.1 1.1M4.2 11.8l-1.1 1.1"/></svg></button>
-    </div>
+    <div class="toolbar-top">
+      <div class="toolbar toolbar--views" role="group" aria-label="Vues">
+        <button class="tool" data-view="face">Face</button>
+        <button class="tool" data-view="large">Large</button>
+        <button class="tool" data-view="gauche" aria-label="Vue trois quarts gauche"><span class="lbl-long">¾ gauche</span><span class="lbl-short">¾ G</span></button>
+        <button class="tool" data-view="droite" aria-label="Vue trois quarts droite"><span class="lbl-long">¾ droite</span><span class="lbl-short">¾ D</span></button>
+        <button class="tool" data-view="rasante">Rasante</button>
+      </div>
 
-    <div class="toolbar toolbar--views" role="group" aria-label="Vues">
-      <button class="tool" data-view="face">Face</button>
-      <button class="tool" data-view="large">Large</button>
-      <button class="tool" data-view="gauche">¾ gauche</button>
-      <button class="tool" data-view="droite">¾ droite</button>
-      <button class="tool" data-view="rasante">Rasante</button>
+      <div class="toolbar toolbar--measure">
+        <button class="tool tool--toggle" id="btn-dims" aria-pressed="false" aria-label="Afficher les mesures" title="Afficher les mesures"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="5" width="14" height="6" rx="1.2"/><path d="M4 5v2.4M6.5 5v1.6M9 5v2.4M11.5 5v1.6"/></svg></button>
+        <button class="tool tool--toggle" id="btn-shadows" aria-pressed="true" aria-label="Masquer les ombres" title="Masquer les ombres"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.2"/><path d="M8 1v1.6M8 13.4V15M1 8h1.6M13.4 8H15M3.1 3.1l1.1 1.1M11.8 11.8l1.1 1.1M12.9 3.1l-1.1 1.1M4.2 11.8l-1.1 1.1"/></svg></button>
+      </div>
     </div>
 
     <div class="toolbar toolbar--edit" role="group" aria-label="Édition">
       <button class="tool" id="btn-undo" title="Annuler (Cmd+Z)">↶</button>
       <button class="tool" id="btn-redo" title="Rétablir (Cmd+Maj+Z)">↷</button>
-      <button class="tool" id="btn-shot" title="Exporter une image">Image</button>
-      <button class="tool" id="btn-full" title="Plein écran — navigation seule">⤢</button>
+      <button class="tool tool--icon" id="btn-shot" aria-label="Exporter une image" title="Exporter une image"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="4.6" width="14" height="9.6" rx="1.7"/><path d="M5.3 4.6l1-1.7h3.4l1 1.7"/><circle cx="8" cy="9.4" r="2.7"/></svg></button>
+      <button class="tool tool--full" id="btn-full" title="Plein écran — navigation seule">
+        <span class="full-icon" aria-hidden="true">⤢</span><span class="lbl-long">Plein écran</span>
+      </button>
     </div>
 
-    <button id="btn-exit-full" class="tool tool--exit" hidden>Quitter le plein écran (Échap)</button>
+    <button id="btn-exit-full" class="tool--exit" hidden aria-label="Quitter le plein écran" title="Quitter le plein écran">×</button>
 
     <div id="warnings" class="warnings" hidden></div>
     <div id="toast" class="toast" hidden></div>
