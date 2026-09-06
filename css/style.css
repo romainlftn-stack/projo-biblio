@@ -209,6 +209,8 @@ kbd {
 .tool:hover { background: #322b24; color: var(--text); }
 .tool:disabled { opacity: .35; cursor: default; }
 .tool.is-active { background: var(--terra); color: #fff; }
+.tool--danger:hover { background: rgba(232, 84, 47, .22); color: #f08a63; }
+.tool[hidden] { display: none; }
 
 /* Bascules d'affichage : une icône et un état actif teinté plutôt qu'un aplat
    plein, qui pesait trop lourd dès que les deux étaient allumées. */

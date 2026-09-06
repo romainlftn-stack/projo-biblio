@@ -281,6 +281,7 @@ function syncSettings() {
   if (document.activeElement !== name) name.value = s.name;
   $('#btn-undo').disabled = !store.canUndo();
   $('#btn-redo').disabled = !store.canRedo();
+  $('#btn-delete').hidden = !s.selection;
   syncing = false;
 }
 
@@ -353,4 +354,10 @@ function bindFiles() {
 function bindToolbar() {
   $('#btn-undo').addEventListener('click', () => store.undo());
   $('#btn-redo').addEventListener('click', () => store.redo());
+  // Sans clavier, la corbeille est le seul moyen de supprimer sans ouvrir le
+  // tiroir : elle n'apparaît que lorsqu'une pièce est sélectionnée.
+  $('#btn-delete').addEventListener('click', () => {
+    const sel = store.getState().selection;
+    if (sel) store.removeItem(sel);
+  });
 }
