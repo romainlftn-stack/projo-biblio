@@ -4,11 +4,11 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
-import { WALL, VIEWS, ceilingAt } from './config.js';
-import { buildRoom, buildStudGuides, updateEnvelopeFade } from './room.js';
+import { WALL, VIEWS, ceilingAt, studPositions } from './config.js';
+import { buildRoom, buildStudGuides, updateStudGuides, updateEnvelopeFade } from './room.js';
 import { buildItem } from './items.js';
 import { LabelLayer, SelectionOutline, buildHeightRuler } from './labels.js';
-import { Interaction, supportingShelf, validate } from './interaction.js';
+import { Interaction, supportingShelf, validate, hasError } from './interaction.js';
 import * as store from './store.js';
 import { initUI } from './ui.js';
 import { initTour } from './tour.js';
@@ -151,7 +151,7 @@ function syncItems() {
     // On ne teinte que les matériaux qui gèrent l'émissif : la boîte de
     // préhension est un MeshBasicMaterial, lui ajouter un `emissive` casse
     // les uniformes du shader au rendu.
-    const bad = item.type !== 'object' && validate(item, items).length > 0;
+    const bad = item.type !== 'object' && hasError(validate(item, items));
     if (rec.bad !== bad) {
       rec.bad = bad;
       rec.group.traverse((o) => {
@@ -198,6 +198,11 @@ const interaction = new Interaction({
 function applySettings() {
   const s = store.getState().settings;
   studs.visible = !!s.showStuds;
+  const trame = `${s.studOffset}/${s.studSpacing}`;
+  if (studs.userData.trame !== trame) {
+    studs.userData.trame = trame;
+    updateStudGuides(studs, studPositions(s.studOffset, s.studSpacing));
+  }
   ruler.visible = !!s.showRuler;
   if (room.userData.furniture) room.userData.furniture.visible = s.showDecor !== false;
   if (room.userData.art) room.userData.art.visible = s.showArt !== false;
@@ -324,12 +329,15 @@ function setWarnings(list) {
   const box = document.getElementById('warnings');
   if (!list || !list.length) { box.hidden = true; return; }
   box.replaceChildren();
+  const erreurs = list.some((i) => i.level === 'error');
+  box.dataset.level = erreurs ? 'error' : 'note';
   const h = document.createElement('strong');
-  h.textContent = 'À revoir';
+  h.textContent = erreurs ? 'À revoir' : 'Bon à savoir';
   const ul = document.createElement('ul');
   for (const w of list) {
     const li = document.createElement('li');
-    li.textContent = w;
+    li.textContent = w.text;
+    li.dataset.level = w.level;
     ul.append(li);
   }
   box.append(h, ul);

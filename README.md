@@ -39,6 +39,24 @@ Reprises de la slide « Nos contraintes » :
   pas deux montants exploitables, qui déborde du rampant, ou qui bute sur la
   porte, la cheminée ou la vitrine.
 
+### Ce que l'outil sait, et ce qu'il suppose
+
+L'entraxe de 600 mm est une donnée sûre : il vient de la note de maman. La
+position du premier montant, elle, n'a été relevée par personne. Le contrôle
+sépare donc les deux :
+
+- **Au-delà de 1 270 mm de long**, une planche couvre deux
+  montants *quelle que soit* la position de la trame — c'est une conséquence de
+  l'entraxe seul. L'outil ne dit rien, il n'y a rien à vérifier.
+  (Le seuil vaut 2 × entraxe + 60 mm de marge de fixation.)
+- **En dessous**, le résultat dépend du calage. L'outil annonce alors
+  explicitement qu'il s'appuie sur une trame supposée, et rappelle la longueur
+  à partir de laquelle le doute disparaît.
+
+Le champ « 1ᵉʳ montant » du panneau permet de recaler la trame une fois les
+montants repérés sur place (détecteur, ou aimant passé sur les vis). Le réglage
+est enregistré avec le projet.
+
 L'aimantation propose les montants **et les milieux d'entraxe** : centrer une
 planche de 120 cm pile sur un montant lui met les deux bouts sur les deux
 montants suivants, sans matière pour fixer. Le milieu d'entraxe donne au

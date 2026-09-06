@@ -57,17 +57,22 @@ export const EXISTING_ART = [
 ];
 
 /**
- * Contrainte de pose (slide « Nos contraintes ») :
- * fixations invisibles vissées dans les rails du placo, entraxe 600 mm,
- * d'où une longueur minimale de 700 mm pour attraper deux montants.
+ * Contrainte de pose (slide « Nos contraintes ») : fixations invisibles
+ * vissées dans les rails du placo, entraxe 600 mm, d'où une longueur minimale
+ * de 700 mm pour attraper deux montants.
+ *
+ * ATTENTION : l'entraxe vient de la note de maman, mais la position du premier
+ * montant n'a été relevée par personne — 30 cm n'est qu'une valeur de départ.
+ * Elle se règle dans le panneau, une fois les montants repérés sur place.
  */
 export const STUDS = { spacing: 0.60, offset: 0.30 };
 export const MIN_SHELF_WIDTH = 0.70;
 
 /** Abscisses des montants placo sur toute la largeur du mur. */
-export function studPositions() {
+export function studPositions(offset = STUDS.offset, spacing = STUDS.spacing) {
+  const step = Math.max(spacing, 0.15);
   const out = [];
-  for (let x = STUDS.offset; x < WALL.width; x += STUDS.spacing) out.push(+x.toFixed(3));
+  for (let x = ((offset % step) + step) % step; x < WALL.width; x += step) out.push(+x.toFixed(3));
   return out;
 }
 
@@ -77,10 +82,10 @@ export function studPositions() {
  * extrémités pile sur deux montants, ce qui ne laisse pas de matière pour
  * fixer ; le milieu d'entraxe donne au contraire deux appuis bien intérieurs.
  */
-export function snapPositions() {
+export function snapPositions(offset = STUDS.offset, spacing = STUDS.spacing) {
   const out = [];
-  for (const s of studPositions()) {
-    out.push(s, +(s + STUDS.spacing / 2).toFixed(3));
+  for (const s of studPositions(offset, spacing)) {
+    out.push(s, +(s + spacing / 2).toFixed(3));
   }
   return out.filter((x) => x > 0 && x < WALL.width).sort((a, b) => a - b);
 }

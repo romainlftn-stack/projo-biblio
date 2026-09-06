@@ -55,40 +55,63 @@ const overlaps = (a, b, m = 0) =>
   a.x0 < b.x1 - m && a.x1 > b.x0 + m && a.y0 < b.y1 - m && a.y1 > b.y0 + m;
 
 /**
- * Contrôle de pose. Renvoie la liste des problèmes rencontrés.
- * Les objets posés sur une étagère ne sont pas contrôlés (ils suivent la planche).
+ * Contrôle de pose. Renvoie une liste de `{ text, level }` :
+ * `error` = pose à corriger (la pièce vire au rouge), `note` = information.
+ * Les objets posés sur une étagère ne sont pas contrôlés, ils suivent la planche.
  */
-export function validate(item, items) {
-  const issues = [];
-  if (item.type === 'object') return issues;
+export function validate(item, items, settings = store.getState().settings) {
+  const out = [];
+  const err = (text) => out.push({ text, level: 'error' });
+  const note = (text) => out.push({ text, level: 'note' });
+  if (item.type === 'object') return out;
+
+  const offset = settings.studOffset ?? 0.30;
+  const spacing = settings.studSpacing ?? 0.60;
   const fp = footprint(item);
 
-  if (fp.x0 < -0.01 || fp.x1 > WALL.width + 0.01) issues.push('Déborde du mur.');
-  const topLeft = ceilingAt(Math.max(fp.x0, 0));
-  const topRight = ceilingAt(Math.min(fp.x1, WALL.width));
-  if (fp.y1 > Math.min(topLeft, topRight)) issues.push('Passe sous le rampant du plafond.');
-  if (fp.y0 < 0) issues.push('Passe sous le sol.');
+  if (fp.x0 < -0.01 || fp.x1 > WALL.width + 0.01) err('Déborde du mur.');
+  const top = Math.min(ceilingAt(Math.max(fp.x0, 0)), ceilingAt(Math.min(fp.x1, WALL.width)));
+  if (fp.y1 > top) err('Passe sous le rampant du plafond.');
+  if (fp.y0 < 0) err('Passe sous le sol.');
 
   for (const f of FIXTURES) {
     if (!f.blocks) continue;
     const y1 = f.y1 ?? ceilingAt((f.x0 + f.x1) / 2);
-    if (overlaps(fp, { x0: f.x0, x1: f.x1, y0: f.y0, y1 }, 0.005)) issues.push(`Bute sur : ${f.label}.`);
+    if (overlaps(fp, { x0: f.x0, x1: f.x1, y0: f.y0, y1 }, 0.005)) err(`Bute sur : ${f.label}.`);
   }
 
   if (item.type === 'shelf') {
     if (item.w < MIN_SHELF_WIDTH - 1e-6) {
-      issues.push(`Moins de ${Math.round(MIN_SHELF_WIDTH * 100)} cm : fixation invisible impossible.`);
+      err(`Moins de ${Math.round(MIN_SHELF_WIDTH * 100)} cm : fixation invisible impossible.`);
     }
-    const studs = studPositions().filter((s) => s > fp.x0 + 0.03 && s < fp.x1 - 0.03);
-    if (studs.length < 2) issues.push('Ne couvre pas 2 montants placo : fixation à revoir.');
+    /*
+     * L'entraxe est une donnée sûre (note de maman), la position de la trame
+     * ne l'est pas. On sépare donc ce qui se déduit de l'entraxe seul — vrai
+     * quelle que soit la trame — de ce qui dépend du calage supposé.
+     */
+    const span = item.w - 0.06;                       // 3 cm de marge à chaque bout
+    const garantis = Math.ceil(span / spacing) - 1;   // pire cas sur toutes les positions
+    const sûre = Math.ceil((2 * spacing + 0.061) * 100);
+    if (garantis < 2) {
+      const reels = studPositions(offset, spacing)
+        .filter((v) => v > fp.x0 + 0.03 && v < fp.x1 - 0.03).length;
+      if (reels >= 2) {
+        note(`Deux montants d'après la trame supposée. À partir de ${sûre} cm, c'est vrai quelle que soit sa position réelle.`);
+      } else {
+        err(`N'attrape qu'un montant avec la trame supposée. À partir de ${sûre} cm, deux appuis sont garantis où qu'elle tombe.`);
+      }
+    }
   }
 
   for (const other of items) {
     if (other.id === item.id || other.type === 'object') continue;
-    if (overlaps(fp, footprint(other), 0.004)) { issues.push('Chevauche une autre pièce.'); break; }
+    if (overlaps(fp, footprint(other), 0.004)) { err('Chevauche une autre pièce.'); break; }
   }
-  return issues;
+  return out;
 }
+
+/** Vrai si la pose comporte au moins un vrai défaut (et non une simple note). */
+export const hasError = (issues) => issues.some((i) => i.level === 'error');
 
 /** Étagère qui peut porter un objet à la position donnée. */
 export function supportingShelf(item, items) {
@@ -333,7 +356,7 @@ export class Interaction {
     }
 
     if (!free && s.snapStuds && item.type === 'shelf') {
-      for (const st of snapPositions()) {
+      for (const st of snapPositions(s.studOffset ?? 0.30, s.studSpacing ?? 0.60)) {
         if (Math.abs(x - st) < STUD_TOL) { x = st; guides.push(['v', st]); break; }
       }
     }

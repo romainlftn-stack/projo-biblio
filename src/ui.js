@@ -2,7 +2,7 @@
 import { SHELVES, FRAMES, OBJECTS, WOODS } from './catalog.js';
 import { MIN_SHELF_WIDTH } from './config.js';
 import * as store from './store.js';
-import { validate } from './interaction.js';
+import { validate, hasError } from './interaction.js';
 
 const $ = (sel) => document.querySelector(sel);
 const cm = (m) => Math.round(m * 100);
@@ -203,7 +203,7 @@ function renderRecap() {
   const objects = s.items.filter((i) => i.type === 'object');
   const ml = shelves.reduce((a, i) => a + i.w, 0);
   const tooShort = shelves.filter((i) => i.w < MIN_SHELF_WIDTH - 1e-6).length;
-  const faulty = s.items.filter((i) => i.type !== 'object' && validate(i, s.items).length).length;
+  const faulty = s.items.filter((i) => i.type !== 'object' && hasError(validate(i, s.items))).length;
 
   const box = $('#recap');
   box.replaceChildren();
@@ -239,6 +239,13 @@ function bindSettings() {
   name.addEventListener('change', () => store.setName(name.value.trim() || 'Projection'));
   $('#btn-dims').addEventListener('click', () => store.setSetting('showDims', !store.getState().settings.showDims));
   $('#btn-shadows').addEventListener('click', () => store.setSetting('showShadows', !store.getState().settings.showShadows));
+  for (const [id, key, min, max] of [['#stud-offset', 'studOffset', 0, 120], ['#stud-spacing', 'studSpacing', 20, 120]]) {
+    const input = $(id);
+    input.addEventListener('change', () => {
+      const v = parseFloat(input.value);
+      if (Number.isFinite(v)) store.setSetting(key, Math.min(Math.max(v, min), max) / 100);
+    });
+  }
 }
 
 let syncing = false;
@@ -253,11 +260,20 @@ function syncSettings() {
   const btn = $('#btn-dims');
   btn.classList.toggle('is-active', !!s.settings.showDims);
   btn.setAttribute('aria-pressed', String(!!s.settings.showDims));
-  btn.textContent = s.settings.showDims ? 'Masquer les mesures' : 'Afficher les mesures';
+  const dimsLabel = s.settings.showDims ? 'Masquer les mesures' : 'Afficher les mesures';
+  btn.setAttribute('aria-label', dimsLabel);
+  btn.title = dimsLabel;
+  for (const [id, key] of [['#stud-offset', 'studOffset'], ['#stud-spacing', 'studSpacing']]) {
+    const input = $(id);
+    if (document.activeElement !== input) input.value = Math.round((s.settings[key] ?? 0) * 100);
+  }
   const sh = $('#btn-shadows');
   const shadows = s.settings.showShadows !== false;
   sh.classList.toggle('is-active', shadows);
   sh.setAttribute('aria-pressed', String(shadows));
+  const shLabel = shadows ? 'Masquer les ombres' : 'Afficher les ombres';
+  sh.setAttribute('aria-label', shLabel);
+  sh.title = shLabel;
   const name = $('#proj-name');
   if (document.activeElement !== name) name.value = s.name;
   $('#btn-undo').disabled = !store.canUndo();

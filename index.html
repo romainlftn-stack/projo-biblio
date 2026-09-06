@@ -46,11 +46,31 @@
       <section class="block">
         <h2>Repères</h2>
         <label class="switch"><input type="checkbox" id="opt-dims"><span></span>Toutes les cotes en cm</label>
-        <label class="switch"><input type="checkbox" id="opt-studs"><span></span>Montants placo (entraxe 60)</label>
+        <label class="switch"><input type="checkbox" id="opt-studs"><span></span>Repères des montants</label>
         <label class="switch"><input type="checkbox" id="opt-ruler"><span></span>Règle des hauteurs</label>
         <label class="switch"><input type="checkbox" id="opt-decor" checked><span></span>Mobilier du salon</label>
         <label class="switch"><input type="checkbox" id="opt-art" checked><span></span>Tableaux déjà en place</label>
         <p class="hint">Décoché, seule la pièce sélectionnée affiche sa cote.</p>
+      </section>
+
+      <section class="block">
+        <h2>Montants placo</h2>
+        <div class="fields">
+          <div class="field">
+            <label for="stud-offset">1<sup>er</sup> montant (cm)</label>
+            <input type="number" id="stud-offset" step="1" min="0" max="120" value="30">
+          </div>
+          <div class="field">
+            <label for="stud-spacing">Entraxe (cm)</label>
+            <input type="number" id="stud-spacing" step="1" min="20" max="120" value="60">
+          </div>
+        </div>
+        <p class="hint hint--warn">
+          Trame <strong>supposée</strong>, pas relevée. L’entraxe de 60 vient de la note
+          de maman ; la position du premier montant reste à mesurer. Repérez-le
+          (détecteur ou aimant sur une vis) et saisissez sa distance au coin gauche
+          du mur — les alertes de fixation en dépendent.
+        </p>
       </section>
 
       <section class="block">
@@ -89,8 +109,8 @@
     <div id="labels" class="labels-layer"></div>
 
     <div class="toolbar toolbar--measure">
-      <button class="tool" id="btn-dims" aria-pressed="false">Afficher les mesures</button>
-      <button class="tool" id="btn-shadows" aria-pressed="true">Ombres</button>
+      <button class="tool tool--toggle" id="btn-dims" aria-pressed="false" aria-label="Afficher les mesures" title="Afficher les mesures"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="5" width="14" height="6" rx="1.2"/><path d="M4 5v2.4M6.5 5v1.6M9 5v2.4M11.5 5v1.6"/></svg></button>
+      <button class="tool tool--toggle" id="btn-shadows" aria-pressed="true" aria-label="Masquer les ombres" title="Masquer les ombres"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.2"/><path d="M8 1v1.6M8 13.4V15M1 8h1.6M13.4 8H15M3.1 3.1l1.1 1.1M11.8 11.8l1.1 1.1M12.9 3.1l-1.1 1.1M4.2 11.8l-1.1 1.1"/></svg></button>
     </div>
 
     <div class="toolbar toolbar--views" role="group" aria-label="Vues">

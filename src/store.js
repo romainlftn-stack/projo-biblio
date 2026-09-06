@@ -22,6 +22,8 @@ const defaultSettings = () => ({
   gridStep: 0.05,
   snapStuds: true,
   snapAlign: true,
+  studOffset: 0.30,
+  studSpacing: 0.60,
 });
 
 let state = {

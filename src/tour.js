@@ -32,7 +32,11 @@ const STEPS = [
   },
   {
     t: 'Vérifier la faisabilité',
-    d: 'Les fixations invisibles se vissent dans les montants placo (entraxe 60 cm), d’où une planche de 70 cm minimum. L’outil prévient si une planche est trop courte, tombe mal ou bute sur la cheminée.',
+    d: 'Les fixations invisibles se vissent dans les montants placo, d’où une planche de 70 cm minimum. L’outil prévient si une planche est trop courte, déborde du rampant ou bute sur la porte, la cheminée ou la vitrine. Pour les montants, il distingue deux cas :',
+    list: [
+      ['Au-delà de 127 cm', 'la planche attrape forcément deux montants, où que tombe la trame. Rien à vérifier.'],
+      ['En dessous', 'cela dépend d’où commence la trame — que personne n’a relevée. L’outil le dit, et vous pouvez saisir la position du premier montant dans le panneau une fois repérée sur place.'],
+    ],
   },
   {
     t: 'Enregistrer et reprendre',

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { WALL, WALL_OUTLINE, FIXTURES, EXISTING_ART, COLORS, ceilingAt, studPositions } from './config.js';
+import { WALL, WALL_OUTLINE, FIXTURES, EXISTING_ART, COLORS, ceilingAt } from './config.js';
 import { buildFramedArt } from './items.js';
 
 const W = WALL.width;
@@ -366,18 +366,25 @@ export function buildRoom(scene) {
   return room;
 }
 
-/** Repères des montants placo (entraxe 600 mm), masquables. */
+/** Repères des montants placo, reconstruits quand la trame est recalée. */
 export function buildStudGuides() {
   const g = new THREE.Group();
   g.name = 'montants';
+  g.visible = false;
+  return g;
+}
+
+export function updateStudGuides(g, positions) {
+  for (const child of [...g.children]) {
+    child.geometry?.dispose();
+    g.remove(child);
+  }
   const m = new THREE.LineBasicMaterial({ color: 0x6fd3c4, transparent: true, opacity: 0.5 });
-  for (const x of studPositions()) {
+  for (const x of positions) {
     const top = ceilingAt(x);
     const geo = new THREE.BufferGeometry().setFromPoints([
       new THREE.Vector3(x, 0.02, 0.004), new THREE.Vector3(x, top - 0.02, 0.004),
     ]);
     g.add(new THREE.Line(geo, m));
   }
-  g.visible = false;
-  return g;
 }
