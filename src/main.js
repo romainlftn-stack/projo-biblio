@@ -7,7 +7,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { WALL, VIEWS, ceilingAt, studPositions } from './config.js';
 import { buildRoom, buildStudGuides, updateStudGuides, updateEnvelopeFade } from './room.js';
 import { buildItem } from './items.js';
-import { LabelLayer, SelectionOutline, buildHeightRuler } from './labels.js';
+import { LabelLayer, SelectionOutline, IssueMarkers, buildHeightRuler } from './labels.js';
 import { Interaction, supportingShelf, validate, hasError } from './interaction.js';
 import * as store from './store.js';
 import { initUI } from './ui.js';
@@ -94,6 +94,7 @@ scene.add(ruler);
 
 const labels = new LabelLayer(scene);
 const outline = new SelectionOutline(scene);
+const issues = new IssueMarkers(scene);
 
 /* -------------------------------------------------------------- items */
 
@@ -109,11 +110,9 @@ function disposeGroup(group) {
   group.traverse((o) => {
     if (!o.isMesh) return;
     o.geometry?.dispose();
-    // Les matériaux bois sont mutualisés entre pièces : seuls les matériaux
-    // propres à cette pièce (proxy, toile, clone de signalement) sont libérés.
-    for (const m of [o.material, o.userData.baseMaterial]) {
-      if (m && !m.userData?.shared) m.dispose();
-    }
+    // Les matériaux bois sont mutualisés entre pièces : seuls ceux propres à
+    // cette pièce (boîte de préhension, toile) sont libérés.
+    if (o.material && !o.material.userData?.shared) o.material.dispose();
   });
 }
 
@@ -132,6 +131,7 @@ function zFor(item, items) {
 function syncItems() {
   const { items, selection } = store.getState();
   const seen = new Set();
+  const badIds = new Set();
 
   for (const item of items) {
     seen.add(item.id);
@@ -147,29 +147,7 @@ function syncItems() {
     // Repères locaux : étagère → y = dessous, cadre → y = centre, objet → y = base.
     rec.group.position.set(item.x, item.y, item.type === 'frame' ? 0 : zFor(item, items));
 
-    // Signalement visuel des poses invalides.
-    // On ne teinte que les matériaux qui gèrent l'émissif : la boîte de
-    // préhension est un MeshBasicMaterial, lui ajouter un `emissive` casse
-    // les uniformes du shader au rendu.
-    const bad = item.type !== 'object' && hasError(validate(item, items));
-    if (rec.bad !== bad) {
-      rec.bad = bad;
-      rec.group.traverse((o) => {
-        if (!o.isMesh || o.userData.isProxy) return;
-        if (!o.userData.baseMaterial) o.userData.baseMaterial = o.material;
-        const src = o.userData.baseMaterial;
-        if (src.emissive === undefined) return;
-        if (bad) {
-          const m = src.clone();
-          m.emissive = new THREE.Color(0x8a2413);
-          m.emissiveIntensity = 0.75;
-          o.material = m;
-        } else {
-          if (o.material !== src) o.material.dispose();
-          o.material = src;
-        }
-      });
-    }
+    if (hasError(validate(item, items))) badIds.add(item.id);
   }
 
   for (const [id, rec] of meshes) {
@@ -178,6 +156,7 @@ function syncItems() {
     meshes.delete(id);
   }
 
+  issues.sync(items, badIds);
   labels.sync(items, store.getState().settings.showDims, selection);
   labels.setSelection(selection);
   const sel = store.getSelected();

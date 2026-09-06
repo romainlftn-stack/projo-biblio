@@ -91,6 +91,50 @@ export class SelectionOutline {
 }
 
 /**
+ * Contours rouges des pièces mal posées.
+ * Teinter le matériau, comme on le faisait, repeignait la planche : sur un
+ * chêne clair la nuance passait, sur du noir mat la pièce virait au rouge. Un
+ * contour signale aussi bien sans toucher à la teinte choisie.
+ */
+export class IssueMarkers {
+  constructor(scene) {
+    this.group = new THREE.Group();
+    this.group.name = 'defauts';
+    scene.add(this.group);
+    this.byId = new Map();
+    this.geometry = new THREE.EdgesGeometry(new THREE.BoxGeometry(1, 1, 1));
+    this.material = new THREE.LineBasicMaterial({
+      color: 0xe8542f, depthTest: false, transparent: true, opacity: 0.95,
+    });
+  }
+
+  sync(items, badIds) {
+    for (const item of items) {
+      const bad = badIds.has(item.id);
+      let box = this.byId.get(item.id);
+      if (!bad) {
+        if (box) { this.group.remove(box); this.byId.delete(item.id); }
+        continue;
+      }
+      if (!box) {
+        box = new THREE.LineSegments(this.geometry, this.material);
+        box.renderOrder = 997;
+        this.group.add(box);
+        this.byId.set(item.id, box);
+      }
+      const b = itemBounds(item);
+      box.scale.set(b.w + 0.03, b.h + 0.03, b.d + 0.03);
+      box.position.set(item.x, item.y + b.y0 + b.h / 2, b.d / 2);
+    }
+    for (const [id, box] of this.byId) {
+      if (items.some((i) => i.id === id)) continue;
+      this.group.remove(box);
+      this.byId.delete(id);
+    }
+  }
+}
+
+/**
  * Règle verticale de rappel : graduations tous les 50 cm sur la gauche du mur,
  * pour situer les hauteurs d'un coup d'œil.
  */
