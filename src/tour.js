@@ -22,7 +22,7 @@ const STEPS = [
     list: [
       ['Flèches jaunes des deux bouts', 'allongent ou raccourcissent la planche.'],
       ['Flèche turquoise devant', 'tire ou pousse la profondeur.'],
-      ['Flèche jaune du dessus', 'sur un cadre ou un objet, règle la hauteur.'],
+      ['Flèche jaune du dessus', 'sur un cadre, règle sa hauteur. Les objets de déco gardent leur taille : ce sont des étalons, le catalogue en propose plusieurs formats.'],
       ['Champs du panneau', 'donnent la taille exacte au centimètre, et la hauteur depuis le sol.'],
     ],
   },

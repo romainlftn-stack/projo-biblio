@@ -160,9 +160,12 @@ function renderInspector() {
     fields.append(numField('Hauteur (cm)', cm(item.h), 1, (v) => set({ h: Math.max(0.05, v / 100) })));
     fields.append(numField('Centre / sol (cm)', cm(item.y), 1, (v) => set({ y: v / 100 })));
   } else {
-    fields.append(numField('Largeur (cm)', cm(item.w), 1, (v) => set({ w: Math.max(0.02, v / 100) })));
-    fields.append(numField('Hauteur (cm)', cm(item.h), 1, (v) => set({ h: Math.max(0.02, v / 100) })));
-    fields.append(numField('Profondeur (cm)', cm(item.d), 1, (v) => set({ d: Math.max(0.02, v / 100) })));
+    // Taille figée : l'objet sert d'étalon, c'est le catalogue qui propose les
+    // variantes. Seule sa place se règle.
+    const dims = el('div', 'field field--wide');
+    dims.append(el('label', null, 'Encombrement'));
+    dims.append(el('div', 'field-static', `${cm(item.w)} × ${cm(item.h)} × ${cm(item.d)} cm`));
+    fields.append(dims);
     fields.append(numField('Base / sol (cm)', cm(item.y), 1, (v) => set({ y: v / 100 })));
   }
   fields.append(numField('Position X (cm)', cm(item.x), 1, (v) => set({ x: v / 100 }), { wide: item.type === 'frame' }));

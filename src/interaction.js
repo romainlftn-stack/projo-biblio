@@ -184,7 +184,9 @@ export class Interaction {
    * dès qu'on posait une petite étagère.
    */
   syncHandles(item) {
-    if (!item) { this.handles.visible = false; return; }
+    // Les objets de déco sont des étalons : on ne les redimensionne pas, et
+    // leurs poignées ne feraient que gêner la prise pour les déplacer.
+    if (!item || item.type === 'object') { this.handles.visible = false; return; }
     const b = itemBounds(item);
     const cy = item.y + b.y0 + b.h / 2;
     const z = b.d / 2;
