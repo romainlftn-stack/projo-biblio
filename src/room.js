@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { WALL, WALL_OUTLINE, FIXTURES, EXISTING_ART, COLORS, ceilingAt, studPositions } from './config.js';
+import { buildFramedArt } from './items.js';
 
 const W = WALL.width;
 
@@ -252,14 +253,11 @@ function buildFixtures(group) {
   art.name = 'tableaux-existants';
   group.add(art);
   for (const a of EXISTING_ART) {
-    const fr = box(a.w, a.h, 0.035, mat(0x8c7355, 0.7));
-    fr.position.set(a.cx, a.cy, 0.02);
-    fr.name = 'art:' + a.id;
-    art.add(fr);
     const canvasMat = new THREE.MeshStandardMaterial({ map: artTexture(a.id), roughness: 0.92 });
-    const canvas = box(a.w - 0.06, a.h - 0.06, 0.01, canvasMat);
-    canvas.position.set(a.cx, a.cy, 0.042);
-    art.add(canvas);
+    const piece = buildFramedArt(a.w, a.h, mat(0x8c7355, 0.7), canvasMat);
+    piece.position.set(a.cx, a.cy, 0);
+    piece.name = 'art:' + a.id;
+    art.add(piece);
   }
 }
 
@@ -346,6 +344,8 @@ function buildFurniture() {
     shade.position.set(x, h, z);
     const cord = box(0.006, 1.2, 0.006, rat);
     cord.position.set(x, h + 0.6, z);
+    // Un fil de 6 mm ne projette rien de lisible, juste un trait parasite.
+    cord.castShadow = false;
     g.add(shade, cord);
   }
 

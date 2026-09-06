@@ -176,6 +176,44 @@ function buildShape(shape, w, h, d, material) {
   return g;
 }
 
+/**
+ * Cadre monté en baguettes autour d'une toile encastrée.
+ * Une toile posée *devant* le cadre projetait sa propre ombre décalée de
+ * quelques centimètres : c'est le trait parasite qu'on voyait à gauche des
+ * tableaux. Ici la toile est en retrait et ne projette pas d'ombre, le
+ * cadre porte seul la silhouette.
+ */
+export function buildFramedArt(w, h, frameMat, canvasMat) {
+  const g = new THREE.Group();
+  const depth = 0.042;
+  const border = Math.min(0.04, w * 0.07, h * 0.07);
+
+  const back = mesh(new THREE.BoxGeometry(w, h, 0.018), frameMat);
+  back.position.z = 0.009;
+  g.add(back);
+
+  const inner = [Math.max(w - border * 2, 0.02), Math.max(h - border * 2, 0.02)];
+  const canvas = mesh(new THREE.BoxGeometry(inner[0], inner[1], 0.006), canvasMat);
+  canvas.position.z = 0.021;
+  canvas.castShadow = false;
+  g.add(canvas);
+
+  // Baguettes : haut, bas, gauche, droite
+  const bars = [
+    [w, border, 0, (h - border) / 2],
+    [w, border, 0, -(h - border) / 2],
+    [border, h - border * 2, -(w - border) / 2, 0],
+    [border, h - border * 2, (w - border) / 2, 0],
+  ];
+  for (const [bw, bh, bx, by] of bars) {
+    const b = mesh(new THREE.BoxGeometry(bw, bh, depth), frameMat);
+    b.position.set(bx, by, depth / 2);
+    g.add(b);
+  }
+  g.userData.frameDepth = depth;
+  return g;
+}
+
 /* ---------------------------------------------------------------- fabrique */
 
 /**
@@ -220,16 +258,10 @@ export function buildItem(item) {
     m.userData.pickable = true;
     g.add(m);
   } else if (item.type === 'frame') {
-    const frameMat = woodMaterial(item.wood);
-    const border = Math.min(0.035, item.w * 0.06, item.h * 0.06);
-    const f = mesh(new THREE.BoxGeometry(item.w, item.h, 0.03), frameMat);
-    f.position.set(0, 0, 0.015);
-    f.userData.pickable = true;
-    g.add(f);
-    const canvas = mesh(new THREE.BoxGeometry(Math.max(item.w - border * 2, 0.02), Math.max(item.h - border * 2, 0.02), 0.008),
+    const art = buildFramedArt(item.w, item.h, woodMaterial(item.wood),
       new THREE.MeshStandardMaterial({ color: item.canvasColor ?? 0xe8e1d4, roughness: 0.94 }));
-    canvas.position.set(0, 0, 0.034);
-    g.add(canvas);
+    art.traverse((o) => { if (o.isMesh) o.userData.pickable = true; });
+    g.add(art);
   } else {
     const entry = catalogEntry('object', item.catalogId);
     const material = new THREE.MeshStandardMaterial({ color: item.color ?? entry.color, roughness: 0.82 });

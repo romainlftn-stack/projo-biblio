@@ -8,6 +8,40 @@ import { itemBounds } from './items.js';
 import * as store from './store.js';
 
 const WALL_PLANE = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+
+/**
+ * Glyphe de poignée : un chevron « > » orienté, ou un double chevron pour la
+ * profondeur qui se tire et se pousse. Dessiné en sprite, donc toujours face
+ * à la caméra et lisible sous tous les angles.
+ */
+const chevronCache = new Map();
+function chevronTexture(glyph, rot, color) {
+  const key = glyph + rot.toFixed(2) + color;
+  if (chevronCache.has(key)) return chevronCache.get(key);
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const x = c.getContext('2d');
+  x.translate(64, 64);
+  x.rotate(rot);
+  x.lineCap = 'round';
+  x.lineJoin = 'round';
+  const paths = glyph === 'double'
+    ? [[[0, -40], [0, 40]], [[-17, -23], [0, -40], [17, -23]], [[-17, 23], [0, 40], [17, 23]]]
+    : [[[-16, -30], [18, 0], [-16, 30]]];
+  for (const pass of [{ w: 24, c: 'rgba(18,14,11,.5)' }, { w: 13, c: '#' + color.toString(16).padStart(6, '0') }]) {
+    x.lineWidth = pass.w;
+    x.strokeStyle = pass.c;
+    for (const pts of paths) {
+      x.beginPath();
+      pts.forEach(([px, py], i) => (i ? x.lineTo(px, py) : x.moveTo(px, py)));
+      x.stroke();
+    }
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  chevronCache.set(key, t);
+  return t;
+}
 const ALIGN_TOL = 0.035;
 const STUD_TOL = 0.05;
 
@@ -83,6 +117,8 @@ export class Interaction {
     this.pointer = new THREE.Vector2();
     this.drag = null;
     this.navOnly = false;
+    // Au doigt, il faut une cible plus généreuse qu'à la souris.
+    this.handlePx = window.matchMedia('(pointer: coarse)').matches ? 46 : 30;
     this.guides = new THREE.Group();
     this.guides.name = 'reperes';
     scene.add(this.guides);
@@ -97,53 +133,66 @@ export class Interaction {
   buildHandles() {
     const g = new THREE.Group();
     g.name = 'poignees';
-    // Jaune et rond pour les longueurs, turquoise et pointu pour la profondeur :
-    // la forme dit d'elle-même qu'on tire vers soi ou qu'on pousse vers le mur.
-    const sizeMat = new THREE.MeshBasicMaterial({ color: 0xffc857, depthTest: false });
-    const depthMat = new THREE.MeshBasicMaterial({ color: 0x4fd6c2, depthTest: false });
     this.handleMeshes = {};
-    // Chaque poignée pointe dans le sens où on peut la tirer.
-    const cones = [
-      ['left',  sizeMat,  [0, 0, Math.PI / 2]],
-      ['right', sizeMat,  [0, 0, -Math.PI / 2]],
-      ['top',   sizeMat,  [0, 0, 0]],
-      ['depth', depthMat, [Math.PI / 2, 0, 0]],
+    const specs = [
+      ['left',  'chevron', Math.PI, 0xffc857],
+      ['right', 'chevron', 0, 0xffc857],
+      ['top',   'chevron', -Math.PI / 2, 0xffc857],
+      ['depth', 'double', 0, 0x4fd6c2],
     ];
-    for (const [key, material, rot] of cones) {
-      const m = new THREE.Mesh(new THREE.ConeGeometry(0.85, 2.2, 16), material);
-      m.rotation.set(...rot);
-      m.renderOrder = 999;
-      m.userData.handle = key;
-      g.add(m);
-      this.handleMeshes[key] = m;
+    for (const [key, glyph, rot, color] of specs) {
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: chevronTexture(glyph, rot, color),
+        depthTest: false,
+        transparent: true,
+      }));
+      sp.renderOrder = 999;
+      sp.userData.handle = key;
+      g.add(sp);
+      this.handleMeshes[key] = sp;
     }
     g.visible = false;
     return g;
   }
 
-  /** Repositionne les poignées autour de l'item sélectionné. */
+  /**
+   * Repositionne les poignées. Elles sont posées *à l'écart* de la pièce :
+   * collées à ses bords, elles se chevauchaient entre elles et avec la planche
+   * dès qu'on posait une petite étagère.
+   */
   syncHandles(item) {
     if (!item) { this.handles.visible = false; return; }
     const b = itemBounds(item);
     const cy = item.y + b.y0 + b.h / 2;
     const z = b.d / 2;
-    this.handleMeshes.left.position.set(item.x - b.w / 2, cy, z);
-    this.handleMeshes.right.position.set(item.x + b.w / 2, cy, z);
-    this.handleMeshes.depth.position.set(item.x, cy, b.d);
+    const gap = 0.07;
+    this.handleMeshes.left.position.set(item.x - b.w / 2 - gap, cy, z);
+    this.handleMeshes.right.position.set(item.x + b.w / 2 + gap, cy, z);
+    this.handleMeshes.depth.position.set(item.x, cy, b.d + gap);
     this.handleMeshes.depth.visible = item.type !== 'frame';
-    this.handleMeshes.top.position.set(item.x, item.y + b.y0 + b.h, z);
+    this.handleMeshes.top.position.set(item.x, item.y + b.y0 + b.h + gap, z);
     this.handleMeshes.top.visible = item.type !== 'shelf';
     this.handles.visible = true;
     this.scaleHandles();
   }
 
-  /** Garde des poignées de taille constante à l'écran, quel que soit le zoom. */
+  /**
+   * Taille des poignées fixée en pixels écran : ni minuscules de loin, ni
+   * envahissantes de près, et toujours cliquables.
+   */
   scaleHandles() {
     if (!this.handles.visible) return;
+    const h = this.dom.clientHeight || 800;
+    const k = (2 * Math.tan((this.camera.fov * Math.PI) / 360)) / h;
     for (const m of this.handles.children) {
-      const d = this.camera.position.distanceTo(m.position);
-      const r = Math.min(Math.max(d * 0.012, 0.028), 0.10);
-      m.scale.setScalar(r);
+      const s = this.handlePx * k * this.camera.position.distanceTo(m.position);
+      m.scale.set(s, s, 1);
+    }
+    // La double flèche suit l'axe de profondeur tel qu'il se projette à l'écran.
+    const depth = this.handleMeshes.depth;
+    if (depth?.visible) {
+      const ax = this.depthAxis(depth.position);
+      depth.material.rotation = Math.atan2(-ax.x, -ax.y);
     }
   }
 
@@ -198,17 +247,26 @@ export class Interaction {
   }
 
   onDown(e) {
-    if (e.button !== 0 || this.navOnly) return;
+    // ⌘ / Ctrl maintenu : le glisser appartient à la navigation, pas à l'édition.
+    if (e.button !== 0 || this.navOnly || e.metaKey || e.ctrlKey) return;
     this.setPointer(e);
 
     if (this.handles.visible) {
       const hit = this.ray.intersectObjects(this.handles.children.filter((c) => c.visible), false)[0];
       if (hit) {
         const item = store.getSelected();
-        this.drag = { mode: 'resize', edge: hit.object.userData.handle, id: item.id,
+        const edge = hit.object.userData.handle;
+        const b = itemBounds(item);
+        const wp = this.wallPoint();
+        // La poignée est décalée du bord : on mémorise l'écart pour que la
+        // pièce ne saute pas au moment de la prise.
+        const edgeX = edge === 'left' ? item.x - b.w / 2 : item.x + b.w / 2;
+        const edgeY = item.y + b.y0 + b.h;
+        this.drag = { mode: 'resize', edge, id: item.id,
           start: { ...item }, before: store.beginTransient(), moved: false,
-          client: { x: e.clientX, y: e.clientY } };
-        if (hit.object.userData.handle === 'depth') this.drag.axis = this.depthAxis(hit.object.position);
+          client: { x: e.clientX, y: e.clientY },
+          grab: wp ? { x: edgeX - wp.x, y: edgeY - wp.y } : { x: 0, y: 0 } };
+        if (edge === 'depth') this.drag.axis = this.depthAxis(hit.object.position);
         this.controls.enabled = false;
         return;
       }
@@ -300,7 +358,7 @@ export class Interaction {
 
     if (this.drag.edge === 'left' || this.drag.edge === 'right') {
       const fixed = this.drag.edge === 'left' ? st.x + st.w / 2 : st.x - st.w / 2;
-      let w = Math.abs(round(p.x) - fixed);
+      let w = Math.abs(round(p.x + this.drag.grab.x) - fixed);
       const min = item.type === 'shelf' ? 0.30 : 0.05;
       w = Math.max(min, Math.min(w, WALL.width));
       patch.w = w;
@@ -312,7 +370,7 @@ export class Interaction {
       }
     } else if (this.drag.edge === 'top') {
       const bottom = item.type === 'frame' ? st.y - st.h / 2 : st.y;
-      let h = Math.max(0.05, round(p.y) - bottom);
+      let h = Math.max(0.05, round(p.y + this.drag.grab.y) - bottom);
       patch.h = h;
       if (item.type === 'frame') patch.y = bottom + h / 2;
     } else if (this.drag.edge === 'depth') {

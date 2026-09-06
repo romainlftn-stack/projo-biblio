@@ -40,7 +40,7 @@ controls.rotateSpeed = 0.75;
 controls.zoomSpeed = 0.9;
 controls.panSpeed = 0.7;
 controls.minDistance = 0.4;
-controls.maxDistance = 22;
+controls.maxDistance = 30;
 controls.maxPolarAngle = Math.PI * 0.86;
 controls.target.set(...VIEWS.face.target);
 controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN };
@@ -54,16 +54,24 @@ scene.environmentIntensity = 0.32;
 scene.add(new THREE.HemisphereLight(0xe8ddc9, 0x3a332c, 0.55));
 
 const sun = new THREE.DirectionalLight(0xffeed6, 1.45);
-sun.position.set(9.5, 6.2, 7.5);
+sun.position.set(11.5, 7.4, 8.5);
 sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
-sun.shadow.camera.left = -7;
-sun.shadow.camera.right = 7;
-sun.shadow.camera.top = 7;
-sun.shadow.camera.bottom = -3;
-sun.shadow.camera.far = 30;
-sun.shadow.bias = -0.0009;
-sun.shadow.normalBias = 0.02;
+// La cible par défaut est l'origine, c'est-à-dire le coin bas gauche du mur :
+// le frustum d'ombre était décentré et gaspillait sa résolution. On le vise au
+// milieu du mur et on le resserre sur la pièce.
+sun.target.position.set(4.07, 1.8, 1.2);
+scene.add(sun.target);
+sun.shadow.mapSize.set(4096, 4096);
+sun.shadow.camera.left = -7.5;
+sun.shadow.camera.right = 7.5;
+sun.shadow.camera.top = 6.5;
+sun.shadow.camera.bottom = -4.5;
+sun.shadow.camera.near = 1;
+sun.shadow.camera.far = 34;
+// normalBias décolle l'ombre de son objet : à 2 cm cela produisait un trait
+// d'ombre détaché à côté des pièces plaquées au mur.
+sun.shadow.bias = -0.0004;
+sun.shadow.normalBias = 0.006;
 scene.add(sun);
 
 const fill = new THREE.DirectionalLight(0xcfd8e6, 0.28);
@@ -193,6 +201,7 @@ function applySettings() {
   ruler.visible = !!s.showRuler;
   if (room.userData.furniture) room.userData.furniture.visible = s.showDecor !== false;
   if (room.userData.art) room.userData.art.visible = s.showArt !== false;
+  sun.castShadow = s.showShadows !== false;
 }
 
 store.subscribe(() => { syncItems(); applySettings(); });
@@ -251,17 +260,52 @@ canvas.addEventListener('drop', (e) => {
 /* --------------------------------------------------------------- vues */
 
 let flight = null;
-function goToView(name) {
+let currentView = 'face';
+
+/**
+ * Distance à laquelle une zone de demi-largeur `halfW` et de demi-hauteur
+ * `halfH` tient dans le cadre. En portrait, le champ horizontal se referme :
+ * sans ce recul on ne verrait qu'une tranche du mur.
+ */
+function fitDistance(halfW, halfH) {
+  const vHalf = (camera.fov * Math.PI) / 360;
+  const hHalf = Math.atan(Math.tan(vHalf) * camera.aspect);
+  return Math.max(halfH / Math.tan(vHalf), halfW / Math.tan(hHalf));
+}
+
+function viewTargets(name) {
   const v = VIEWS[name];
-  if (!v) return;
-  flight = {
-    t: 0,
-    fromPos: camera.position.clone(), toPos: new THREE.Vector3(...v.pos),
-    fromTar: controls.target.clone(), toTar: new THREE.Vector3(...v.target),
-  };
+  const target = new THREE.Vector3(...v.target);
+  const pos = new THREE.Vector3(...v.pos);
+  const dir = pos.clone().sub(target).normalize();
+  const base = pos.distanceTo(target);
+  // En portrait, tout faire tenir demanderait un recul énorme et l'image
+  // deviendrait minuscule : on borne, quitte à laisser l'utilisateur
+  // balayer le mur. La vue « Large », plus reculée d'origine, garde sa marge.
+  const dist = Math.min(
+    Math.max(base, fitDistance(WALL.width / 2 + 0.2, 2.7)),
+    Math.max(base * 1.9, 17)
+  );
+  return { pos: target.clone().addScaledVector(dir, dist), target };
+}
+
+function goToView(name, instant = false) {
+  if (!VIEWS[name]) return;
+  currentView = name;
+  const { pos, target } = viewTargets(name);
+  if (instant) {
+    camera.position.copy(pos);
+    controls.target.copy(target);
+    flight = null;
+  } else {
+    flight = { t: 0, fromPos: camera.position.clone(), toPos: pos,
+      fromTar: controls.target.clone(), toTar: target };
+  }
   for (const b of document.querySelectorAll('[data-view]')) b.classList.toggle('is-active', b.dataset.view === name);
 }
-for (const b of document.querySelectorAll('[data-view]')) b.addEventListener('click', () => goToView(b.dataset.view));
+for (const b of document.querySelectorAll('[data-view]')) {
+  b.addEventListener('click', () => { userMovedCamera = false; goToView(b.dataset.view); });
+}
 document.querySelector('[data-view="face"]').classList.add('is-active');
 
 /* -------------------------------------------------------------- messages */
@@ -291,6 +335,18 @@ function setWarnings(list) {
   box.append(h, ul);
   box.hidden = false;
 }
+
+/*
+ * ⌘ (ou Ctrl) maintenu : le glisser translate au lieu de pivoter. Au trackpad
+ * c'est bien plus praticable que le clic droit.
+ */
+function setPanModifier(on) {
+  controls.mouseButtons.LEFT = on ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
+  stage.classList.toggle('is-panning', on);
+}
+window.addEventListener('keydown', (e) => { if (e.key === 'Meta' || e.key === 'Control') setPanModifier(true); });
+window.addEventListener('keyup', (e) => { if (e.key === 'Meta' || e.key === 'Control') setPanModifier(false); });
+window.addEventListener('blur', () => setPanModifier(false));
 
 /* ------------------------------------------------------------ raccourcis */
 
@@ -365,16 +421,23 @@ document.getElementById('btn-shot').addEventListener('click', () => {
 
 /* ------------------------------------------------------------ dimension */
 
+let userMovedCamera = false;
+controls.addEventListener('start', () => { userMovedCamera = true; });
+
 function resize() {
-  const w = stage.clientWidth;
-  const h = stage.clientHeight;
+  const w = Math.max(stage.clientWidth, 1);
+  const h = Math.max(stage.clientHeight, 1);
   renderer.setSize(w, h, false);
   labelRenderer.setSize(w, h);
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
+  // Rotation d'écran ou fenêtre redimensionnée : on recadre, sauf si
+  // l'utilisateur a lui-même déplacé la caméra depuis la dernière vue.
+  if (!userMovedCamera && !flight) goToView(currentView, true);
 }
 new ResizeObserver(resize).observe(stage);
 resize();
+goToView('face', true);
 
 /* ------------------------------------------------------------- boucle */
 

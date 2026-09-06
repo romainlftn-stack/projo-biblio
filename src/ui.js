@@ -16,8 +16,36 @@ const el = (tag, cls, text) => {
 let ctx = null;
 let activeTab = 'shelf';
 
+/* ------------------------------------------------------ tiroir mobile */
+
+/**
+ * Sous 860 px le panneau est un tiroir posé par-dessus le visualiseur.
+ * Poser une pièce le referme, sinon on ne verrait pas ce qu'on vient de faire.
+ */
+function setDrawer(open) {
+  document.body.classList.toggle('panel-open', open);
+  $('#mob-backdrop').hidden = !open;
+  $('#mob-panel-btn').setAttribute('aria-expanded', String(open));
+}
+
+const isDrawerLayout = () => window.matchMedia('(max-width: 860px)').matches;
+
+export function closeDrawerAfterAction() {
+  if (isDrawerLayout()) setDrawer(false);
+}
+
+function bindDrawer() {
+  $('#mob-panel-btn').addEventListener('click', () => setDrawer(true));
+  $('#mob-backdrop').addEventListener('click', () => setDrawer(false));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.body.classList.contains('panel-open')) setDrawer(false);
+  });
+  window.addEventListener('resize', () => { if (!isDrawerLayout()) setDrawer(false); });
+}
+
 export function initUI(context) {
   ctx = context;
+  bindDrawer();
   bindTabs();
   bindSettings();
   bindFiles();
@@ -74,7 +102,10 @@ function renderBank() {
     chip.append(el('div', 'chip-dim', dims));
     if (e.note) chip.append(el('div', 'chip-note', e.note));
 
-    chip.addEventListener('click', () => ctx.addFromCatalog(activeTab, e.id));
+    chip.addEventListener('click', () => {
+      ctx.addFromCatalog(activeTab, e.id);
+      closeDrawerAfterAction();
+    });
     chip.addEventListener('dragstart', (ev) => {
       ev.dataTransfer.setData('application/x-projo', JSON.stringify({ type: activeTab, id: e.id }));
       ev.dataTransfer.effectAllowed = 'copy';
@@ -207,6 +238,7 @@ function bindSettings() {
   const name = $('#proj-name');
   name.addEventListener('change', () => store.setName(name.value.trim() || 'Projection'));
   $('#btn-dims').addEventListener('click', () => store.setSetting('showDims', !store.getState().settings.showDims));
+  $('#btn-shadows').addEventListener('click', () => store.setSetting('showShadows', !store.getState().settings.showShadows));
 }
 
 let syncing = false;
@@ -222,6 +254,10 @@ function syncSettings() {
   btn.classList.toggle('is-active', !!s.settings.showDims);
   btn.setAttribute('aria-pressed', String(!!s.settings.showDims));
   btn.textContent = s.settings.showDims ? 'Masquer les mesures' : 'Afficher les mesures';
+  const sh = $('#btn-shadows');
+  const shadows = s.settings.showShadows !== false;
+  sh.classList.toggle('is-active', shadows);
+  sh.setAttribute('aria-pressed', String(shadows));
   const name = $('#proj-name');
   if (document.activeElement !== name) name.value = s.name;
   $('#btn-undo').disabled = !store.canUndo();

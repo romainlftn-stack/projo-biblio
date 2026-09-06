@@ -24,7 +24,7 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-#app { display: flex; height: 100%; }
+#app { display: flex; height: 100%; position: relative; }
 
 /* ------------------------------------------------------------ panneau */
 
@@ -170,13 +170,13 @@ kbd {
 
 #stage { position: relative; flex: 1; min-width: 0; min-height: 0; }
 #scene { display: block; width: 100%; height: 100%; touch-action: none; }
+#stage.is-panning #scene { cursor: grab; }
 
 .labels-layer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .cote {
   padding: 2px 6px; border-radius: 5px; white-space: nowrap;
   background: rgba(20,17,14,.82); color: #f0e9de; font-size: 11px;
   font-variant-numeric: tabular-nums; border: 1px solid rgba(255,255,255,.12);
-  transform: translateX(4px);
 }
 .cote.is-selected { background: var(--accent); color: #241c08; border-color: var(--accent); font-weight: 650; }
 .cote--regle { background: none; border: 0; color: rgba(255,255,255,.5); }
@@ -213,8 +213,9 @@ kbd {
 
 .nav-hint {
   position: absolute; left: 14px; bottom: 12px; margin: 0;
-  font-size: 11px; color: rgba(236,231,223,.42);
+  font-size: 11px; color: rgba(236,231,223,.5);
 }
+.nav-hint kbd { font-size: 10px; padding: 0 3px; }
 
 /* ------------------------------------------- plein écran, navigation seule */
 
@@ -254,23 +255,81 @@ body.is-nav .nav-hint { color: rgba(236,231,223,.6); }
 }
 .tour-steps h3 { margin: 1px 0 2px; font-size: 13px; font-weight: 650; }
 .tour-steps p { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+.tour-gestes { margin: 7px 0 0; padding-left: 15px; display: grid; gap: 4px; }
+.tour-gestes li { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+.tour-gestes b { color: var(--text); font-weight: 600; }
 .tour-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .tour-foot .btn { flex: 0 0 auto; padding: 9px 18px; }
 
-@media (max-width: 900px) {
-  #app { flex-direction: column-reverse; }
+/* ---------- MOBILE (<= 860px) ----------
+   Le visualiseur occupe tout l'écran ; le panneau devient un tiroir qui glisse
+   par-dessus, au lieu d'empiler la page verticalement et de réduire la 3D à
+   une bande. Même logique que l'atelier tattoo. */
+
+.mob-btn, .mob-backdrop { display: none; }
+
+@media (max-width: 860px) {
+  html, body { overflow: hidden; }
+  #app { display: block; height: 100dvh; }
+
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; }
+
   #panel {
-    width: 100%; flex: 0 0 52vh; max-height: 52vh;
-    border-right: 0; border-top: 1px solid var(--line);
+    position: fixed; top: 0; bottom: 0; left: 0; z-index: 70;
+    width: min(84vw, 330px); flex: none; max-height: none;
+    border-right: 1px solid var(--line); border-top: 0;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    transform: translateX(-104%);
+    transition: transform .24s cubic-bezier(.2, .8, .3, 1);
+    box-shadow: 0 0 40px rgba(0, 0, 0, .5);
   }
-  #stage { flex: 1 1 48vh; min-height: 48vh; }
-  .panel-head { padding: 10px 12px 8px; }
-  .panel-foot { padding: 9px 12px; }
-  .dropzone { padding: 8px 10px; }
-  .dropzone span { display: none; }
-  .bank { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-  .toolbar--views { flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 28px); }
-  .toolbar--edit { top: auto; bottom: 12px; right: 12px; }
-  .toolbar--measure { top: auto; bottom: 12px; left: 12px; }
+  body.panel-open #panel { transform: none; }
+
+  .mob-backdrop {
+    display: block; position: fixed; inset: 0; z-index: 60;
+    background: rgba(10, 8, 6, .55); backdrop-filter: blur(2px);
+  }
+  .mob-backdrop[hidden] { display: none; }
+
+  .mob-btn {
+    display: flex; align-items: center; gap: 6px; position: fixed; z-index: 65;
+    left: calc(12px + env(safe-area-inset-left));
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    height: 42px; padding: 0 18px; border-radius: 21px;
+    border: 0; background: var(--terra); color: #fff;
+    font: inherit; font-size: 13.5px; font-weight: 600;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .35);
+  }
+  body.panel-open .mob-btn, body.is-nav .mob-btn { display: none; }
+
+  /* Les vues défilent latéralement plutôt que de se replier sur deux étages. */
+  .toolbar--views {
+    top: calc(8px + env(safe-area-inset-top)); left: 8px; right: 8px;
+    transform: none; justify-content: flex-start;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .toolbar--views::-webkit-scrollbar { display: none; }
+  .toolbar--views .tool { flex: none; }
+  .toolbar--measure { top: calc(58px + env(safe-area-inset-top)); left: 8px; }
+  .toolbar--edit {
+    top: auto; bottom: calc(14px + env(safe-area-inset-bottom));
+    right: calc(10px + env(safe-area-inset-right));
+  }
+  .tool--exit { top: calc(8px + env(safe-area-inset-top)); right: 8px; }
+
+  .bank { grid-template-columns: 1fr 1fr; }
+  .warnings { left: 10px; right: 10px; bottom: 68px; max-width: none; }
+  .toast { bottom: 74px; }
   .nav-hint { display: none; }
+
+  .tour-card { padding: 20px 18px; border-radius: 12px; }
+  .tour-foot { flex-direction: column; align-items: stretch; gap: 10px; }
+  .tour-foot .btn { width: 100%; }
+}
+
+/* Écrans très étroits : deux réglages de plus pour ne rien tronquer. */
+@media (max-width: 400px) {
+  .bank { grid-template-columns: 1fr; }
+  .toolbar--measure .tool { padding: 6px 8px; font-size: 11.5px; }
 }

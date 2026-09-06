@@ -52,7 +52,8 @@ export class LabelLayer {
       rec.el.textContent = dimText(item);
       rec.el.dataset.type = item.type;
       rec.obj.visible = !!showAll || item.id === selection;
-      rec.obj.position.set(item.x + b.w / 2 + 0.05, item.y + b.y0 + b.h / 2, b.d + 0.02);
+      // Au-dessus et centrée : à droite, elle tombait sur la poignée de bord.
+      rec.obj.position.set(item.x, item.y + b.y0 + b.h + 0.19, b.d + 0.02);
     }
     for (const [id, rec] of this.byId) {
       if (seen.has(id)) continue;

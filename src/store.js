@@ -17,6 +17,7 @@ const defaultSettings = () => ({
   showDecor: true,
   showArt: true,
   showRuler: false,
+  showShadows: true,
   snapGrid: true,
   gridStep: 0.05,
   snapStuds: true,

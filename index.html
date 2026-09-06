@@ -81,12 +81,16 @@
     </footer>
   </aside>
 
+  <button id="mob-panel-btn" class="mob-btn" aria-expanded="false" aria-controls="panel">Catalogue</button>
+  <div id="mob-backdrop" class="mob-backdrop" hidden></div>
+
   <main id="stage">
     <canvas id="scene"></canvas>
     <div id="labels" class="labels-layer"></div>
 
     <div class="toolbar toolbar--measure">
       <button class="tool" id="btn-dims" aria-pressed="false">Afficher les mesures</button>
+      <button class="tool" id="btn-shadows" aria-pressed="true">Ombres</button>
     </div>
 
     <div class="toolbar toolbar--views" role="group" aria-label="Vues">
@@ -110,7 +114,7 @@
     <div id="toast" class="toast" hidden></div>
 
     <p class="nav-hint">
-      Clic gauche&nbsp;: pivoter · Clic droit&nbsp;: translater · Molette&nbsp;: avancer / reculer
+      Glisser&nbsp;: pivoter · <kbd>⌘</kbd>+glisser&nbsp;: se décaler · Deux doigts&nbsp;: avancer / reculer
     </p>
   </main>
 </div>

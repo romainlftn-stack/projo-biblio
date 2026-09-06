@@ -4,7 +4,13 @@ import { markTourSeen, tourSeen } from './store.js';
 const STEPS = [
   {
     t: 'Se déplacer dans le salon',
-    d: 'Clic gauche maintenu pour pivoter autour du mur, clic droit pour translater, molette pour avancer ou reculer. Les cinq boutons en haut ramènent à une vue de référence.',
+    d: 'Quatre gestes, et rien d’autre à retenir :',
+    list: [
+      ['Pivoter autour du mur', 'un doigt sur le trackpad, ou clic gauche maintenu, et on fait glisser.'],
+      ['Avancer / reculer', 'deux doigts qui glissent vers le haut ou vers le bas, ou la molette.'],
+      ['Se décaler sans pivoter', 'maintenir ⌘ et faire glisser. Le clic droit maintenu fait la même chose.'],
+      ['Revenir à une vue nette', 'les cinq boutons en haut (Face, Large, ¾ gauche, ¾ droite, Rasante).'],
+    ],
   },
   {
     t: 'Poser une planche',
@@ -12,7 +18,13 @@ const STEPS = [
   },
   {
     t: 'Déplacer et redimensionner',
-    d: 'Faites glisser une planche pour la déplacer. Une fois sélectionnée, tirez les billes jaunes des extrémités pour changer la longueur, et le cône turquoise de devant pour tirer ou pousser la profondeur. Les champs du panneau donnent la taille exacte au centimètre.',
+    d: 'Faites glisser une planche pour la déplacer. Sélectionnée, elle s’entoure de flèches qui pointent dans le sens où on peut les tirer :',
+    list: [
+      ['Flèches jaunes des deux bouts', 'allongent ou raccourcissent la planche.'],
+      ['Flèche turquoise devant', 'tire ou pousse la profondeur.'],
+      ['Flèche jaune du dessus', 'sur un cadre ou un objet, règle la hauteur.'],
+      ['Champs du panneau', 'donnent la taille exacte au centimètre, et la hauteur depuis le sol.'],
+    ],
   },
   {
     t: 'Meubler les étagères',
@@ -57,6 +69,18 @@ export function initTour() {
     const d = document.createElement('p');
     d.textContent = s.d;
     body.append(t, d);
+    if (s.list) {
+      const ul = document.createElement('ul');
+      ul.className = 'tour-gestes';
+      for (const [nom, texte] of s.list) {
+        const li = document.createElement('li');
+        const b = document.createElement('b');
+        b.textContent = nom;
+        li.append(b, document.createTextNode(' — ' + texte));
+        ul.append(li);
+      }
+      body.append(ul);
+    }
     li.append(num, body);
     ol.append(li);
   });
