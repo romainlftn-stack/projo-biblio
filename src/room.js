@@ -3,6 +3,105 @@ import { WALL, WALL_OUTLINE, FIXTURES, EXISTING_ART, COLORS, ceilingAt, studPosi
 
 const W = WALL.width;
 
+/** Point de référence à l'intérieur du salon, pour orienter les normales. */
+const INSIDE = new THREE.Vector3(4.07, 1.5, 3.2);
+
+/**
+ * Marque une surface d'enveloppe : dès que la caméra passe de l'autre côté,
+ * elle s'efface en voile translucide au lieu de masquer toute la scène.
+ * `a`, `b`, `c` sont trois points du plan.
+ */
+function tagFade(mesh, a, b, c) {
+  const n = new THREE.Vector3().subVectors(b, a).cross(new THREE.Vector3().subVectors(c, a)).normalize();
+  if (n.dot(new THREE.Vector3().subVectors(INSIDE, a)) < 0) n.negate();
+  mesh.userData.fade = { point: a.clone(), normal: n };
+  return mesh;
+}
+
+/**
+ * Rend translucides les surfaces derrière lesquelles la caméra est passée.
+ * Le basculement n'a lieu qu'au changement d'état : muter `transparent`
+ * recompile le shader, on évite de le faire à chaque image.
+ */
+export function updateEnvelopeFade(root, camera) {
+  root.traverse((o) => {
+    const f = o.userData.fade;
+    if (!f || !o.material) return;
+    const outside = camera.position.clone().sub(f.point).dot(f.normal) < 0;
+    if (o.userData.faded === outside) return;
+    o.userData.faded = outside;
+    const m = o.material;
+    m.transparent = outside;
+    m.opacity = outside ? 0.12 : 1;
+    m.depthWrite = !outside;
+    m.needsUpdate = true;
+  });
+}
+
+/**
+ * Toiles des tableaux déjà accrochés, redessinées à plat dans la même
+ * direction artistique que le reste de la scène.
+ */
+function artTexture(id) {
+  const c = document.createElement('canvas');
+  c.width = 512;
+  c.height = id === 'art-graine' ? 658 : 384;
+  const x = c.getContext('2d');
+  const W2 = c.width;
+  const H2 = c.height;
+
+  if (id === 'art-graine') {
+    x.fillStyle = '#b9c8d2';
+    x.fillRect(0, 0, W2, H2);
+    // la forme orange, en goutte renversée
+    x.fillStyle = '#d9963f';
+    x.beginPath();
+    x.moveTo(W2 * 0.30, H2 * 0.44);
+    x.bezierCurveTo(W2 * 0.16, H2 * 0.66, W2 * 0.26, H2 * 0.88, W2 * 0.50, H2 * 0.88);
+    x.bezierCurveTo(W2 * 0.80, H2 * 0.88, W2 * 0.90, H2 * 0.60, W2 * 0.78, H2 * 0.40);
+    x.bezierCurveTo(W2 * 0.70, H2 * 0.27, W2 * 0.56, H2 * 0.30, W2 * 0.56, H2 * 0.46);
+    x.bezierCurveTo(W2 * 0.56, H2 * 0.60, W2 * 0.62, H2 * 0.70, W2 * 0.55, H2 * 0.74);
+    x.bezierCurveTo(W2 * 0.44, H2 * 0.79, W2 * 0.36, H2 * 0.60, W2 * 0.30, H2 * 0.44);
+    x.fill();
+    // l'amande sombre en suspension
+    x.save();
+    x.translate(W2 * 0.47, H2 * 0.20);
+    x.rotate(-0.32);
+    x.fillStyle = '#3f2f24';
+    x.beginPath();
+    x.ellipse(0, 0, W2 * 0.16, H2 * 0.055, 0, 0, Math.PI * 2);
+    x.fill();
+    x.restore();
+  } else {
+    x.fillStyle = '#e7ddcd';
+    x.fillRect(0, 0, W2, H2);
+    // ronde de silhouettes, façon papiers découpés
+    const poses = [
+      [0.14, 0.62, 0.10, 0.34, -0.30, '#8a4a33'],
+      [0.34, 0.50, 0.11, 0.40, 0.22, '#3f2f28'],
+      [0.53, 0.58, 0.10, 0.36, -0.16, '#c08a63'],
+      [0.72, 0.48, 0.11, 0.42, 0.30, '#6b3a2a'],
+      [0.88, 0.64, 0.09, 0.32, -0.24, '#3f2f28'],
+    ];
+    for (const [cx, cy, w, h, rot, col] of poses) {
+      x.save();
+      x.translate(W2 * cx, H2 * cy);
+      x.rotate(rot);
+      x.fillStyle = col;
+      x.beginPath();
+      x.ellipse(0, 0, W2 * w * 0.5, H2 * h * 0.5, 0, 0, Math.PI * 2);
+      x.fill();
+      x.beginPath();
+      x.arc(0, -H2 * h * 0.62, W2 * w * 0.34, 0, Math.PI * 2);
+      x.fill();
+      x.restore();
+    }
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
 function mat(color, rough = 0.9, metal = 0) {
   return new THREE.MeshStandardMaterial({ color, roughness: rough, metalness: metal });
 }
@@ -49,27 +148,33 @@ function buildEnvelope(group) {
   const depth = 9.5;
 
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(W + 3, depth), mat(COLORS.floor, 0.85));
+  floor.name = 'sol';
   floor.rotation.x = -Math.PI / 2;
   floor.position.set(W / 2, 0, depth / 2);
   floor.receiveShadow = true;
   group.add(floor);
 
-  // Retours latéraux
+  // Retours latéraux : matériaux distincts, chacun s'efface indépendamment
   const sideL = new THREE.Mesh(new THREE.PlaneGeometry(depth, 6), mat(COLORS.side, 0.95));
   sideL.rotation.y = Math.PI / 2;
   sideL.position.set(0, 3, depth / 2);
   sideL.receiveShadow = true;
+  sideL.material.side = THREE.DoubleSide;
+  tagFade(sideL, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 1));
   group.add(sideL);
 
-  const sideR = sideL.clone();
+  const sideR = new THREE.Mesh(new THREE.PlaneGeometry(depth, 6), mat(COLORS.side, 0.95));
   sideR.rotation.y = -Math.PI / 2;
   sideR.position.set(W, 3, depth / 2);
+  sideR.receiveShadow = true;
+  sideR.material.side = THREE.DoubleSide;
+  tagFade(sideR, new THREE.Vector3(W, 0, 0), new THREE.Vector3(W, 1, 0), new THREE.Vector3(W, 0, 1));
   group.add(sideR);
 
   // Plafond rampant : deux pans suivant le faîtage du mur
-  const ceilMat = mat(COLORS.ceiling, 0.95);
-  ceilMat.side = THREE.DoubleSide;
   const mkSlope = (x0, x1) => {
+    const ceilMat = mat(COLORS.ceiling, 0.95);
+    ceilMat.side = THREE.DoubleSide;
     const h0 = ceilingAt(x0);
     const h1 = ceilingAt(x1);
     const g = new THREE.BufferGeometry();
@@ -80,16 +185,21 @@ function buildEnvelope(group) {
     g.computeVertexNormals();
     const m = new THREE.Mesh(g, ceilMat);
     m.receiveShadow = true;
+    m.name = 'rampant';
+    tagFade(m, new THREE.Vector3(x0, h0, 0), new THREE.Vector3(x1, h1, 0), new THREE.Vector3(x1, h1, depth));
     return m;
   };
   group.add(mkSlope(0, WALL.apexX), mkSlope(WALL.apexX, W));
 
   // Pannes blanches sous le rampant
-  const beamMat = mat(COLORS.beam, 0.85);
   [[1.35, 0.35], [WALL.apexX, 0.16], [5.4, 0.35]].forEach(([x, len]) => {
     const h = ceilingAt(x);
-    const b = box(0.16, 0.22, depth * 0.92, beamMat);
+    const b = box(0.16, 0.22, depth * 0.92, mat(COLORS.beam, 0.85));
     b.position.set(x, h - 0.13 - len * 0.1, depth * 0.46);
+    const x1 = x <= WALL.apexX ? WALL.apexX : W;
+    const x0 = x <= WALL.apexX ? 0 : WALL.apexX;
+    tagFade(b, new THREE.Vector3(x0, ceilingAt(x0), 0), new THREE.Vector3(x1, ceilingAt(x1), 0),
+            new THREE.Vector3(x1, ceilingAt(x1), depth));
     group.add(b);
   });
 }
@@ -146,7 +256,8 @@ function buildFixtures(group) {
     fr.position.set(a.cx, a.cy, 0.02);
     fr.name = 'art:' + a.id;
     art.add(fr);
-    const canvas = box(a.w - 0.06, a.h - 0.06, 0.01, mat(a.id === 'art-graine' ? 0xd79a4e : 0xe6ded1, 0.9));
+    const canvasMat = new THREE.MeshStandardMaterial({ map: artTexture(a.id), roughness: 0.92 });
+    const canvas = box(a.w - 0.06, a.h - 0.06, 0.01, canvasMat);
     canvas.position.set(a.cx, a.cy, 0.042);
     art.add(canvas);
   }

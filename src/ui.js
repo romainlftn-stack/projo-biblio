@@ -206,6 +206,7 @@ function bindSettings() {
   }
   const name = $('#proj-name');
   name.addEventListener('change', () => store.setName(name.value.trim() || 'Projection'));
+  $('#btn-dims').addEventListener('click', () => store.setSetting('showDims', !store.getState().settings.showDims));
 }
 
 let syncing = false;
@@ -217,6 +218,10 @@ function syncSettings() {
     const input = document.getElementById(id);
     if (input) input.checked = !!s.settings[key];
   }
+  const btn = $('#btn-dims');
+  btn.classList.toggle('is-active', !!s.settings.showDims);
+  btn.setAttribute('aria-pressed', String(!!s.settings.showDims));
+  btn.textContent = s.settings.showDims ? 'Masquer les mesures' : 'Afficher les mesures';
   const name = $('#proj-name');
   if (document.activeElement !== name) name.value = s.name;
   $('#btn-undo').disabled = !store.canUndo();

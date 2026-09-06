@@ -97,10 +97,21 @@ export class Interaction {
   buildHandles() {
     const g = new THREE.Group();
     g.name = 'poignees';
-    const mat = new THREE.MeshBasicMaterial({ color: 0xffc857, depthTest: false });
+    // Jaune et rond pour les longueurs, turquoise et pointu pour la profondeur :
+    // la forme dit d'elle-même qu'on tire vers soi ou qu'on pousse vers le mur.
+    const sizeMat = new THREE.MeshBasicMaterial({ color: 0xffc857, depthTest: false });
+    const depthMat = new THREE.MeshBasicMaterial({ color: 0x4fd6c2, depthTest: false });
     this.handleMeshes = {};
-    for (const key of ['left', 'right', 'depth', 'top']) {
-      const m = new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), mat);
+    // Chaque poignée pointe dans le sens où on peut la tirer.
+    const cones = [
+      ['left',  sizeMat,  [0, 0, Math.PI / 2]],
+      ['right', sizeMat,  [0, 0, -Math.PI / 2]],
+      ['top',   sizeMat,  [0, 0, 0]],
+      ['depth', depthMat, [Math.PI / 2, 0, 0]],
+    ];
+    for (const [key, material, rot] of cones) {
+      const m = new THREE.Mesh(new THREE.ConeGeometry(0.85, 2.2, 16), material);
+      m.rotation.set(...rot);
       m.renderOrder = 999;
       m.userData.handle = key;
       g.add(m);
@@ -108,7 +119,7 @@ export class Interaction {
     }
     g.visible = false;
     return g;
-}
+  }
 
   /** Repositionne les poignées autour de l'item sélectionné. */
   syncHandles(item) {
@@ -156,6 +167,30 @@ export class Interaction {
     this.scene.updateMatrixWorld(true);
   }
 
+  /**
+   * Projette l'axe de profondeur (+z) à l'écran depuis un point donné :
+   * renvoie sa direction en pixels et le nombre de pixels par mètre, pour que
+   * le glisser suive le geste quel que soit l'angle de la caméra.
+   */
+  depthAxis(origin) {
+    const r = this.dom.getBoundingClientRect();
+    const toPx = (v) => {
+      const p = v.clone().project(this.camera);
+      return { x: (p.x * 0.5 + 0.5) * r.width, y: (-p.y * 0.5 + 0.5) * r.height };
+    };
+    const a = toPx(origin);
+    const b = toPx(origin.clone().add(new THREE.Vector3(0, 0, 0.1)));
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const len = Math.hypot(dx, dy);
+    const pxPerM = len / 0.1;
+    // Vu presque de face, l'axe pointe vers la caméra et ne se projette
+    // quasiment pas : le glisser deviendrait hypersensible. On retombe alors
+    // sur un glisser vertical, et on borne la sensibilité dans tous les cas.
+    if (pxPerM < 80) return { x: 0, y: 1, pxPerM: 320 };
+    return { x: dx / len, y: dy / len, pxPerM: Math.min(Math.max(pxPerM, 160), 3000) };
+  }
+
   /** Point d'intersection avec le plan du mur. */
   wallPoint() {
     const p = new THREE.Vector3();
@@ -171,7 +206,9 @@ export class Interaction {
       if (hit) {
         const item = store.getSelected();
         this.drag = { mode: 'resize', edge: hit.object.userData.handle, id: item.id,
-          start: { ...item }, before: store.beginTransient(), moved: false };
+          start: { ...item }, before: store.beginTransient(), moved: false,
+          client: { x: e.clientX, y: e.clientY } };
+        if (hit.object.userData.handle === 'depth') this.drag.axis = this.depthAxis(hit.object.position);
         this.controls.enabled = false;
         return;
       }
@@ -279,11 +316,9 @@ export class Interaction {
       patch.h = h;
       if (item.type === 'frame') patch.y = bottom + h / 2;
     } else if (this.drag.edge === 'depth') {
-      const camDist = this.camera.position.distanceTo(this.handleMeshes.depth.position);
-      const delta = (p.y - (st.y + itemBounds(st).y0 + itemBounds(st).h / 2)) * 0.6;
-      let d = Math.max(0.08, Math.min(0.60, round(st.d + delta)));
-      patch.d = d;
-      void camDist;
+      const ax = this.drag.axis;
+      const along = ((e.clientX - this.drag.client.x) * ax.x + (e.clientY - this.drag.client.y) * ax.y) / ax.pxPerM;
+      patch.d = Math.max(0.08, Math.min(0.60, round(st.d + along)));
     }
     store.updateItem(item.id, patch, { transient: true });
   }

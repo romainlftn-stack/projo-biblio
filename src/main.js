@@ -5,7 +5,7 @@ import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 import { WALL, VIEWS, ceilingAt } from './config.js';
-import { buildRoom, buildStudGuides } from './room.js';
+import { buildRoom, buildStudGuides, updateEnvelopeFade } from './room.js';
 import { buildItem } from './items.js';
 import { LabelLayer, SelectionOutline, buildHeightRuler } from './labels.js';
 import { Interaction, supportingShelf, validate } from './interaction.js';
@@ -28,7 +28,7 @@ renderer.toneMappingExposure = 0.92;
 const labelRenderer = new CSS2DRenderer({ element: document.getElementById('labels') });
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x12100e);
+scene.background = new THREE.Color(0xa8a49c);  // lu comme la lumière du dehors, pas comme un trou
 
 const camera = new THREE.PerspectiveCamera(46, 1, 0.05, 120);
 camera.position.set(...VIEWS.face.pos);
@@ -392,6 +392,7 @@ function tick() {
   }
 
   controls.update();
+  updateEnvelopeFade(room, camera);
   interaction.scaleHandles();
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);

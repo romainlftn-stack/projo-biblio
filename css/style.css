@@ -186,6 +186,7 @@ kbd {
   background: rgba(24,20,17,.86); border: 1px solid var(--line);
   border-radius: 9px; backdrop-filter: blur(8px);
 }
+.toolbar--measure { top: 14px; left: 14px; }
 .toolbar--views { top: 14px; left: 50%; transform: translateX(-50%); }
 .toolbar--edit { top: 14px; right: 14px; }
 .tool {
@@ -225,6 +226,7 @@ kbd {
 .tool--exit:hover { background: var(--terra); color: #fff; }
 
 body.is-nav #panel,
+body.is-nav .toolbar--measure,
 body.is-nav .toolbar--edit,
 body.is-nav .warnings,
 body.is-nav .labels-layer { display: none; }
@@ -269,5 +271,6 @@ body.is-nav .nav-hint { color: rgba(236,231,223,.6); }
   .bank { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
   .toolbar--views { flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 28px); }
   .toolbar--edit { top: auto; bottom: 12px; right: 12px; }
+  .toolbar--measure { top: auto; bottom: 12px; left: 12px; }
   .nav-hint { display: none; }
 }

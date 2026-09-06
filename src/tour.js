@@ -12,7 +12,7 @@ const STEPS = [
   },
   {
     t: 'Déplacer et redimensionner',
-    d: 'Faites glisser une planche pour la déplacer. Une fois sélectionnée, tirez les pastilles jaunes : celles des extrémités changent la longueur, celle de devant la profondeur. Les champs du panneau donnent la taille exacte au centimètre.',
+    d: 'Faites glisser une planche pour la déplacer. Une fois sélectionnée, tirez les billes jaunes des extrémités pour changer la longueur, et le cône turquoise de devant pour tirer ou pousser la profondeur. Les champs du panneau donnent la taille exacte au centimètre.',
   },
   {
     t: 'Meubler les étagères',
