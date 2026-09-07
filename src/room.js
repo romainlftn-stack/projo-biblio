@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { WALL, WALL_OUTLINE, FIXTURES, EXISTING_ART, COLORS, ceilingAt } from './config.js';
+import { WALL, WALL_OUTLINE, FIXTURES, COLORS, ceilingAt } from './config.js';
 import { buildFramedArt } from './items.js';
 
 const W = WALL.width;
@@ -37,70 +37,6 @@ export function updateEnvelopeFade(root, camera) {
     m.depthWrite = !outside;
     m.needsUpdate = true;
   });
-}
-
-/**
- * Toiles des tableaux déjà accrochés, redessinées à plat dans la même
- * direction artistique que le reste de la scène.
- */
-function artTexture(id) {
-  const c = document.createElement('canvas');
-  c.width = 512;
-  c.height = id === 'art-graine' ? 658 : 384;
-  const x = c.getContext('2d');
-  const W2 = c.width;
-  const H2 = c.height;
-
-  if (id === 'art-graine') {
-    x.fillStyle = '#b9c8d2';
-    x.fillRect(0, 0, W2, H2);
-    // la forme orange, en goutte renversée
-    x.fillStyle = '#d9963f';
-    x.beginPath();
-    x.moveTo(W2 * 0.30, H2 * 0.44);
-    x.bezierCurveTo(W2 * 0.16, H2 * 0.66, W2 * 0.26, H2 * 0.88, W2 * 0.50, H2 * 0.88);
-    x.bezierCurveTo(W2 * 0.80, H2 * 0.88, W2 * 0.90, H2 * 0.60, W2 * 0.78, H2 * 0.40);
-    x.bezierCurveTo(W2 * 0.70, H2 * 0.27, W2 * 0.56, H2 * 0.30, W2 * 0.56, H2 * 0.46);
-    x.bezierCurveTo(W2 * 0.56, H2 * 0.60, W2 * 0.62, H2 * 0.70, W2 * 0.55, H2 * 0.74);
-    x.bezierCurveTo(W2 * 0.44, H2 * 0.79, W2 * 0.36, H2 * 0.60, W2 * 0.30, H2 * 0.44);
-    x.fill();
-    // l'amande sombre en suspension
-    x.save();
-    x.translate(W2 * 0.47, H2 * 0.20);
-    x.rotate(-0.32);
-    x.fillStyle = '#3f2f24';
-    x.beginPath();
-    x.ellipse(0, 0, W2 * 0.16, H2 * 0.055, 0, 0, Math.PI * 2);
-    x.fill();
-    x.restore();
-  } else {
-    x.fillStyle = '#e7ddcd';
-    x.fillRect(0, 0, W2, H2);
-    // ronde de silhouettes, façon papiers découpés
-    const poses = [
-      [0.14, 0.62, 0.10, 0.34, -0.30, '#8a4a33'],
-      [0.34, 0.50, 0.11, 0.40, 0.22, '#3f2f28'],
-      [0.53, 0.58, 0.10, 0.36, -0.16, '#c08a63'],
-      [0.72, 0.48, 0.11, 0.42, 0.30, '#6b3a2a'],
-      [0.88, 0.64, 0.09, 0.32, -0.24, '#3f2f28'],
-    ];
-    for (const [cx, cy, w, h, rot, col] of poses) {
-      x.save();
-      x.translate(W2 * cx, H2 * cy);
-      x.rotate(rot);
-      x.fillStyle = col;
-      x.beginPath();
-      x.ellipse(0, 0, W2 * w * 0.5, H2 * h * 0.5, 0, 0, Math.PI * 2);
-      x.fill();
-      x.beginPath();
-      x.arc(0, -H2 * h * 0.62, W2 * w * 0.34, 0, Math.PI * 2);
-      x.fill();
-      x.restore();
-    }
-  }
-  const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.SRGBColorSpace;
-  return t;
 }
 
 function mat(color, rough = 0.9, metal = 0) {
@@ -205,6 +141,55 @@ function buildEnvelope(group) {
   });
 }
 
+/**
+ * Vitrine : une carcasse ouverte plutôt qu'un bloc plein, pour qu'on voie
+ * qu'elle est garnie. Bas fermé, trois tablettes d'objets, montant central
+ * et deux battants vitrés.
+ */
+function buildVitrine(f, y1) {
+  const g = new THREE.Group();
+  g.name = 'fixture:' + f.id;
+  const bois = mat(0x7a5a3c, 0.62);
+  const fond = mat(0x5d442c, 0.8);
+  const w = f.x1 - f.x0;
+  const cx = (f.x0 + f.x1) / 2;
+  const put = (mesh, x, y, z) => { mesh.position.set(x, y, z); g.add(mesh); return mesh; };
+
+  put(box(w, y1, 0.04, fond), cx, y1 / 2, 0.02);                    // fond
+  put(box(0.05, y1, f.d, bois), f.x0 + 0.025, y1 / 2, f.d / 2);      // joue gauche
+  put(box(0.05, y1, f.d, bois), f.x1 - 0.025, y1 / 2, f.d / 2);      // joue droite
+  put(box(w, 0.07, f.d, bois), cx, y1 - 0.035, f.d / 2);             // dessus
+  put(box(w, 0.55, f.d, bois), cx, 0.275, f.d / 2);                  // bas fermé
+  put(box(0.05, y1 - 0.55, 0.05, bois), cx, 0.55 + (y1 - 0.55) / 2, f.d - 0.03);  // montant central
+
+  // Tablettes et leur garniture
+  const objets = mat(0xcfc3ae, 0.85);
+  const livres = mat(0x8a6f5c, 0.8);
+  const verre = mat(0xb7c2bd, 0.35);
+  for (const [ty, contenu] of [
+    [0.95, [[-0.46, 0.22, 0.16, livres], [-0.10, 0.15, 0.13, objets], [0.34, 0.26, 0.11, verre]]],
+    [1.38, [[-0.38, 0.17, 0.12, objets], [0.02, 0.24, 0.15, livres], [0.44, 0.19, 0.13, objets]]],
+    [1.80, [[-0.30, 0.20, 0.14, verre], [0.20, 0.16, 0.18, livres]]],
+  ]) {
+    put(box(w - 0.12, 0.03, f.d - 0.10, bois), cx, ty, f.d / 2);
+    for (const [dx, h, bw, material] of contenu) {
+      put(box(bw, h, 0.13, material), cx + dx, ty + 0.015 + h / 2, f.d * 0.45);
+    }
+  }
+
+  // Battants vitrés, de part et d'autre du montant
+  const glass = new THREE.MeshStandardMaterial({
+    color: 0x9fb0ab, roughness: 0.1, metalness: 0.1, transparent: true, opacity: 0.28,
+  });
+  const bw = (w - 0.16) / 2;
+  for (const dir of [-1, 1]) {
+    const p = box(bw, y1 - 0.62, 0.012, glass);
+    p.castShadow = false;
+    put(p, cx + dir * (bw / 2 + 0.035), 0.55 + (y1 - 0.62) / 2, f.d - 0.008);
+  }
+  return g;
+}
+
 /** Volumes existants : meuble bas, cheminée, vitrine, porte… */
 function buildFixtures(group) {
   const mats = {
@@ -224,19 +209,14 @@ function buildFixtures(group) {
       group.add(d);
       continue;
     }
+    if (f.id === 'vitrine') {
+      group.add(buildVitrine(f, y1));
+      continue;
+    }
+
     const m = placeBox(f.x0, f.x1, f.y0, y1, f.d, mats[f.kind] || mats.wood);
     m.name = 'fixture:' + f.id;
     group.add(m);
-
-    if (f.id === 'vitrine') {
-      // Vitrage : deux portes vitrées
-      const glass = new THREE.MeshStandardMaterial({
-        color: 0x3a463f, roughness: 0.14, metalness: 0.05, transparent: true, opacity: 0.62,
-      });
-      const g = box(f.x1 - f.x0 - 0.16, y1 - 0.5, 0.02, glass);
-      g.position.set((f.x0 + f.x1) / 2, 0.30 + (y1 - 0.5) / 2, f.d + 0.005);
-      group.add(g);
-    }
     if (f.id === 'meuble-bas') {
       // Rainures des portes
       const line = mat(0x6d5238, 0.8);
@@ -248,88 +228,105 @@ function buildFixtures(group) {
     }
   }
 
-  // Tableaux déjà accrochés
-  const art = new THREE.Group();
-  art.name = 'tableaux-existants';
-  group.add(art);
-  for (const a of EXISTING_ART) {
-    const canvasMat = new THREE.MeshStandardMaterial({ map: artTexture(a.id), roughness: 0.92 });
-    const piece = buildFramedArt(a.w, a.h, mat(0x8c7355, 0.7), canvasMat);
-    piece.position.set(a.cx, a.cy, 0);
-    piece.name = 'art:' + a.id;
-    art.add(piece);
-  }
 }
 
-/** Mobilier du salon, simplifié mais à l'échelle : canapé, tables, fauteuil, tapis, plantes. */
+/** Table basse ovale : un cylindre aplati sur trois pieds fuyants. */
+function ovalTable(cx, cz, rx, rz, h, wood) {
+  const g = new THREE.Group();
+  const top = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.05, 36), wood);
+  top.scale.set(rx, 1, rz);
+  top.position.set(0, h, 0);
+  top.castShadow = true;
+  top.receiveShadow = true;
+  g.add(top);
+  for (let i = 0; i < 3; i++) {
+    const a = (i / 3) * Math.PI * 2 + 0.4;
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.026, h, 8), wood);
+    leg.position.set(Math.cos(a) * rx * 0.66, h / 2, Math.sin(a) * rz * 0.66);
+    leg.rotation.z = -Math.cos(a) * 0.09;
+    leg.rotation.x = Math.sin(a) * 0.09;
+    leg.castShadow = true;
+    g.add(leg);
+  }
+  g.position.set(cx, 0, cz);
+  return g;
+}
+
+/** Fauteuil : assise, dossier incliné, accoudoirs. Le dos est côté -z. */
+function armchair(cream, wood) {
+  const g = new THREE.Group();
+  const seat = box(0.78, 0.20, 0.74, cream);
+  seat.position.set(0, 0.40, 0);
+  const back = box(0.78, 0.62, 0.16, cream);
+  back.position.set(0, 0.78, -0.32);
+  back.rotation.x = 0.16;
+  const armL = box(0.10, 0.16, 0.68, wood);
+  armL.position.set(-0.40, 0.58, 0.02);
+  const armR = armL.clone();
+  armR.position.x = 0.40;
+  g.add(seat, back, armL, armR);
+  for (const [lx, lz] of [[-0.34, 0.30], [0.34, 0.30], [-0.34, -0.28], [0.34, -0.28]]) {
+    const leg = box(0.05, 0.32, 0.05, wood);
+    leg.position.set(lx, 0.16, lz);
+    g.add(leg);
+  }
+  return g;
+}
+
+/** Mobilier du salon : canapé d'angle, tables ovales, fauteuil, tapis, plantes. */
 function buildFurniture() {
   const g = new THREE.Group();
   g.name = 'mobilier';
   const cream = mat(0xd9d5cb, 0.92);
   const wood = mat(0x9a7a55, 0.7);
-  const rug = mat(0xb0a89b, 0.95);
-  const leaf = mat(0x55703f, 0.85);
+  const rug = mat(0xa39684, 0.96);
   const pot = mat(0xa8916f, 0.8);
 
-  // Tapis
-  const r = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 2.4), rug);
+  // Tapis : x 2.30 → 5.90, z 2.25 → 4.85
+  const r = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 2.6), rug);
   r.rotation.x = -Math.PI / 2;
-  r.position.set(3.9, 0.006, 3.5);
+  r.position.set(4.1, 0.006, 3.55);
   r.receiveShadow = true;
   g.add(r);
 
-  // Canapé d'angle : assise + dossiers
+  /*
+   * Canapé d'angle en L : la grande longueur borde le tapis côté salon, et
+   * le retour remonte le long du bord gauche jusqu'à l'avant du tapis, vers
+   * le mur rouge.
+   */
   const sofa = new THREE.Group();
-  const seat = box(3.3, 0.42, 1.0, cream);
-  seat.position.set(0, 0.34, 0);
-  const backA = box(3.3, 0.55, 0.28, cream);
-  backA.position.set(0, 0.68, -0.36);
-  const armL = box(0.26, 0.30, 1.0, cream);
-  armL.position.set(-1.52, 0.62, 0);
-  const armR = armL.clone();
-  armR.position.x = 1.52;
-  sofa.add(seat, backA, armL, armR);
-  const wing = box(1.05, 0.42, 0.95, cream);
-  wing.position.set(-1.62, 0.34, 0.97);
-  const wingBack = box(0.26, 0.55, 0.95, cream);
-  wingBack.position.set(-2.02, 0.68, 0.97);
-  sofa.add(wing, wingBack);
-  sofa.position.set(3.6, 0, 4.5);
-  sofa.rotation.y = Math.PI;
+  const piece = (w, h, d, x, y, z) => {
+    const m = box(w, h, d, cream);
+    m.position.set(x, y, z);
+    sofa.add(m);
+    return m;
+  };
+  piece(3.60, 0.42, 1.00, 4.10, 0.21, 4.85);   // assise, grande longueur
+  piece(3.60, 0.56, 0.26, 4.10, 0.70, 5.22);   // dossier
+  piece(3.30, 0.16, 0.86, 4.25, 0.50, 4.78);   // coussins
+  piece(0.26, 0.32, 1.00, 5.77, 0.58, 4.85);   // accoudoir droit
+  piece(1.05, 0.42, 1.90, 2.82, 0.21, 3.45);   // retour du L
+  piece(0.26, 0.56, 1.90, 2.43, 0.70, 3.45);   // dossier du retour
+  piece(0.92, 0.16, 1.70, 2.88, 0.50, 3.45);   // coussins du retour
+  piece(1.05, 0.30, 0.24, 2.82, 0.57, 2.62);   // accoudoir bas, côté mur
   g.add(sofa);
 
-  // Tables basses
-  const t1 = box(1.15, 0.06, 0.72, wood);
-  t1.position.set(4.15, 0.42, 3.15);
-  g.add(t1);
-  const t2 = box(0.72, 0.06, 0.62, wood);
-  t2.position.set(5.05, 0.35, 3.62);
-  g.add(t2);
-  for (const [tx, tz, ty] of [[3.72, 2.92, 0.42], [4.58, 2.92, 0.42], [4.15, 3.42, 0.42],
-                              [4.78, 3.42, 0.35], [5.32, 3.42, 0.35], [5.05, 3.86, 0.35]]) {
-    const leg = box(0.035, ty, 0.035, wood);
-    leg.position.set(tx, ty / 2, tz);
-    g.add(leg);
-  }
+  // Deux tables ovales devant le canapé
+  g.add(ovalTable(4.45, 3.55, 0.58, 0.38, 0.40, wood));
+  g.add(ovalTable(5.28, 4.10, 0.38, 0.30, 0.33, wood));
 
-  // Fauteuil à bascule
-  const chair = new THREE.Group();
-  const cseat = box(0.72, 0.22, 0.72, cream);
-  cseat.position.set(0, 0.42, 0);
-  chair.add(cseat);
-  const cb = box(0.72, 0.62, 0.18, cream);
-  cb.position.set(0, 0.78, -0.30);
-  cb.rotation.x = -0.18;
-  chair.add(cb);
-  chair.position.set(6.55, 0, 3.6);
-  chair.rotation.y = -0.55;
+  // Fauteuil en diagonale, côté avant droit du tapis
+  const chair = armchair(cream, wood);
+  chair.position.set(5.55, 0, 2.85);
+  chair.rotation.y = -2.5;
   g.add(chair);
 
-  // Plantes
-  for (const [x, z, s2] of [[7.7, 2.5, 1.15], [7.5, 4.4, 0.9]]) {
+  // Trois plantes devant la baie
+  for (const [x, z, s2] of [[7.72, 2.30, 1.15], [7.48, 4.25, 0.9], [7.86, 5.70, 1.0]]) {
     const p2 = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.17, 0.34, 16), pot);
     p2.position.set(x, 0.17, z);
-    const foliage = new THREE.Mesh(new THREE.IcosahedronGeometry(0.46 * s2, 1), leaf);
+    const foliage = new THREE.Mesh(new THREE.IcosahedronGeometry(0.46 * s2, 1),
+      mat(0x55703f, 0.85));
     foliage.position.set(x, 0.34 + 0.46 * s2, z);
     p2.castShadow = foliage.castShadow = true;
     g.add(p2, foliage);
@@ -352,6 +349,39 @@ function buildFurniture() {
   return g;
 }
 
+/**
+ * Baie vitrée du mur de droite. Volontairement sans paysage derrière : une
+ * surface claire et non éclairée suffit à lire « lumière du dehors ».
+ */
+function buildBay() {
+  const g = new THREE.Group();
+  g.name = 'baie';
+  const x = WALL.width - 0.02;
+  const z0 = 1.7;
+  const z1 = 6.0;
+  const y0 = 0.22;
+  const y1 = 2.70;
+
+  const jour = new THREE.Mesh(
+    new THREE.PlaneGeometry(z1 - z0, y1 - y0),
+    new THREE.MeshBasicMaterial({ color: 0xeef2f2 })
+  );
+  jour.rotation.y = -Math.PI / 2;
+  jour.position.set(x, (y0 + y1) / 2, (z0 + z1) / 2);
+  g.add(jour);
+
+  const cadre = mat(0x4a453f, 0.7);
+  const bar = (h, d, y, z) => {
+    const m = box(0.06, h, d, cadre);
+    m.position.set(x - 0.03, y, z);
+    g.add(m);
+  };
+  bar(0.07, z1 - z0, y0, (z0 + z1) / 2);
+  bar(0.07, z1 - z0, y1, (z0 + z1) / 2);
+  for (const z of [z0, (z0 + z1) / 2, z1]) bar(y1 - y0, 0.07, (y0 + y1) / 2, z);
+  return g;
+}
+
 export function buildRoom(scene) {
   const room = new THREE.Group();
   room.name = 'salon';
@@ -359,9 +389,9 @@ export function buildRoom(scene) {
   buildEnvelope(room);
   buildFixtures(room);
   const furniture = buildFurniture();
+  furniture.add(buildBay());
   room.add(furniture);
   room.userData.furniture = furniture;
-  room.userData.art = room.getObjectByName('tableaux-existants');
   scene.add(room);
   return room;
 }

@@ -2,7 +2,7 @@
 import { SHELVES, FRAMES, OBJECTS, WOODS } from './catalog.js';
 import { MIN_SHELF_WIDTH } from './config.js';
 import * as store from './store.js';
-import { validate, hasError } from './interaction.js';
+import { validate, hasError, objectDepth, supportingSurface } from './interaction.js';
 
 const $ = (sel) => document.querySelector(sel);
 const cm = (m) => Math.round(m * 100);
@@ -167,6 +167,14 @@ function renderInspector() {
     dims.append(el('div', 'field-static', `${cm(item.w)} × ${cm(item.h)} × ${cm(item.d)} cm`));
     fields.append(dims);
     fields.append(numField('Base / sol (cm)', cm(item.y), 1, (v) => set({ y: v / 100 })));
+    // Recul sur le plateau : mesuré du mur au centre de l'objet, borné par la
+    // profondeur du support pour qu'il ne flotte pas dans le vide.
+    const items = store.getState().items;
+    const sup = supportingSurface(item, items);
+    const half = item.d / 2;
+    const zMax = sup ? Math.max(sup.depth - half, half) : 0.6;
+    fields.append(numField('Recul / mur (cm)', cm(objectDepth(item, items)), 1,
+      (v) => set({ z: Math.min(Math.max(v / 100, half), zMax) })));
   }
   fields.append(numField('Position X (cm)', cm(item.x), 1, (v) => set({ x: v / 100 }), { wide: item.type === 'frame' }));
 
@@ -230,7 +238,7 @@ function renderRecap() {
 const SETTING_INPUTS = {
   'opt-dims': 'showDims', 'opt-studs': 'showStuds', 'opt-decor': 'showDecor',
   'opt-grid': 'snapGrid', 'opt-align': 'snapAlign', 'opt-snapstuds': 'snapStuds',
-  'opt-ruler': 'showRuler', 'opt-art': 'showArt',
+  'opt-ruler': 'showRuler',
 };
 
 function bindSettings() {

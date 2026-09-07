@@ -8,7 +8,7 @@ import { WALL, VIEWS, ceilingAt, studPositions } from './config.js';
 import { buildRoom, buildStudGuides, updateStudGuides, updateEnvelopeFade } from './room.js';
 import { buildItem } from './items.js';
 import { LabelLayer, SelectionOutline, IssueMarkers, buildHeightRuler } from './labels.js';
-import { Interaction, supportingShelf, validate, hasError } from './interaction.js';
+import { Interaction, objectDepth, validate, hasError } from './interaction.js';
 import * as store from './store.js';
 import { initUI } from './ui.js';
 import { initTour } from './tour.js';
@@ -118,14 +118,12 @@ function disposeGroup(group) {
 
 /** Signature géométrique : un changement force la reconstruction du maillage. */
 function sig(item) {
-  return [item.type, item.catalogId, item.w, item.h, item.d, item.t, item.wood, item.color].join('|');
+  return [item.type, item.catalogId, item.w, item.h, item.d, item.t, item.wood, item.color, item.art, item.artSeed].join('|');
 }
 
 /** Profondeur (z) du centre d'un item. */
 function zFor(item, items) {
-  if (item.type !== 'object') return 0;
-  const shelf = supportingShelf(item, items);
-  return shelf ? shelf.d / 2 : 0.16;
+  return item.type === 'object' ? objectDepth(item, items) : 0;
 }
 
 function syncItems() {
@@ -184,7 +182,6 @@ function applySettings() {
   }
   ruler.visible = !!s.showRuler;
   if (room.userData.furniture) room.userData.furniture.visible = s.showDecor !== false;
-  if (room.userData.art) room.userData.art.visible = s.showArt !== false;
   sun.castShadow = s.showShadows !== false;
 }
 
@@ -457,6 +454,7 @@ initUI({ addFromCatalog, toast, setWarnings, goToView });
 initTour();
 
 if (store.restoreAutosave()) toast('Session précédente restaurée.');
+store.seedIfEmpty();
 syncItems();
 applySettings();
 tick();

@@ -50,6 +50,9 @@ export const FIXTURES = [
   { id: 'vitrine',    label: 'Vitrine 1464×2268',   x0: 6.61,  x1: 8.074, y0: 0,    y1: 2.268, d: 0.50, kind: 'cabinet', blocks: true },
 ];
 
+/** Meubles offrant un plateau où poser des objets : [id, hauteur, profondeur]. */
+export const SUPPORT_TOPS = ['meuble-bas', 'buches', 'foyer-socle', 'vitrine'];
+
 /** Tableaux déjà en place sur le mur (repris de l'élévation). */
 export const EXISTING_ART = [
   { id: 'art-graine',  label: 'Tableau graine',  w: 0.95, h: 1.22, cx: 3.62, cy: 1.86 },

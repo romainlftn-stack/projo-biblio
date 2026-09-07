@@ -15,7 +15,6 @@ const defaultSettings = () => ({
   showDims: false,
   showStuds: false,
   showDecor: true,
-  showArt: true,
   showRuler: false,
   showShadows: true,
   snapGrid: true,
@@ -111,9 +110,29 @@ export function makeItem(type, catalogId, x, y, extra = {}) {
     ...extra,
   };
   if (type === 'shelf') Object.assign(base, { w: e.w, d: e.d, t: e.t });
-  else if (type === 'frame') Object.assign(base, { w: e.w, h: e.h, d: 0.05 });
+  else if (type === 'frame') Object.assign(base, { w: e.w, h: e.h, d: 0.05, art: e.art, artSeed: 0 });
   else Object.assign(base, { w: e.w, h: e.h, d: e.d, color: e.color });
   return base;
+}
+
+/**
+ * Pièces présentes dans un projet neuf : les deux tableaux déjà accrochés,
+ * relevés sur les photos. Ce sont des items comme les autres, donc
+ * déplaçables et supprimables.
+ */
+export function defaultItems() {
+  return [
+    makeItem('frame', 'f-graine', 3.62, 1.86, { wood: 'chene-nature' }),
+    makeItem('frame', 'f-danse', 6.30, 2.95, { wood: 'chene-nature' }),
+  ];
+}
+
+export function seedIfEmpty() {
+  if (state.items.length) return false;
+  state.items = defaultItems();
+  past = []; future = [];
+  emit('seed');
+  return true;
 }
 
 export function addItem(item, { select = true } = {}) {
@@ -206,6 +225,7 @@ export function fromJSON(data, { history = true } = {}) {
       x: n(raw.x, 1), y: n(raw.y, 1),
       w: n(raw.w, 1), d: n(raw.d, 0.25),
       h: raw.h === undefined ? undefined : n(raw.h, 0.3),
+      z: raw.z === undefined ? undefined : n(raw.z, 0.15),
       t: raw.t === undefined ? undefined : n(raw.t, 0.04),
       wood: raw.wood || DEFAULT_WOOD,
     });

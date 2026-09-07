@@ -36,6 +36,162 @@ export function woodMaterial(id) {
   return m;
 }
 
+/**
+ * Toiles abstraites pour les cadres, écrites comme le tableau existant :
+ * aplats, formes organiques, et la palette du salon — terre, ocre, crème,
+ * bleu-gris, brun profond.
+ */
+const PALETTE = {
+  fond:   ['#c3ccd2', '#e7ddcd', '#d9cfbc', '#b9c8d2', '#e0d6c4'],
+  terre:  '#a85a3e', ocre: '#d9963f', creme: '#efe7d9',
+  brun:   '#3f2f24', olive: '#7d8a5f', sable: '#cbb08a', ardoise: '#6f7d86',
+};
+
+const artCache = new Map();
+
+/** Motifs disponibles ; `art` d'un cadre désigne l'un d'eux. */
+export const ART_KEYS = ['graine', 'danse', 'galet', 'arche', 'horizon', 'feuille', 'cercles', 'vague', 'colonnes', 'lune'];
+
+export function artCanvasTexture(key, seed = 0) {
+  const id = key + ':' + seed;
+  if (artCache.has(id)) return artCache.get(id);
+  const c = document.createElement('canvas');
+  c.width = 320;
+  c.height = 400;
+  const x = c.getContext('2d');
+  const W = c.width;
+  const H = c.height;
+  const P = PALETTE;
+  x.fillStyle = P.fond[seed % P.fond.length];
+  x.fillRect(0, 0, W, H);
+
+  const blob = (cx, cy, rx, ry, rot, fill) => {
+    x.save();
+    x.translate(cx, cy);
+    x.rotate(rot);
+    x.fillStyle = fill;
+    x.beginPath();
+    x.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+    x.fill();
+    x.restore();
+  };
+
+  switch (key) {
+    case 'graine':
+      // le tableau du salon : la goutte ocre et l'amande en suspension
+      x.fillStyle = '#b9c8d2';
+      x.fillRect(0, 0, W, H);
+      x.fillStyle = P.ocre;
+      x.beginPath();
+      x.moveTo(W * 0.30, H * 0.44);
+      x.bezierCurveTo(W * 0.16, H * 0.66, W * 0.26, H * 0.88, W * 0.50, H * 0.88);
+      x.bezierCurveTo(W * 0.80, H * 0.88, W * 0.90, H * 0.60, W * 0.78, H * 0.40);
+      x.bezierCurveTo(W * 0.70, H * 0.27, W * 0.56, H * 0.30, W * 0.56, H * 0.46);
+      x.bezierCurveTo(W * 0.56, H * 0.60, W * 0.62, H * 0.70, W * 0.55, H * 0.74);
+      x.bezierCurveTo(W * 0.44, H * 0.79, W * 0.36, H * 0.60, W * 0.30, H * 0.44);
+      x.fill();
+      blob(W * 0.47, H * 0.20, W * 0.16, H * 0.045, -0.32, P.brun);
+      break;
+    case 'danse': {
+      // la ronde de silhouettes, façon papiers découpés
+      x.fillStyle = '#e7ddcd';
+      x.fillRect(0, 0, W, H);
+      const poses = [
+        [0.14, 0.62, 0.10, 0.34, -0.30, '#8a4a33'],
+        [0.34, 0.50, 0.11, 0.40, 0.22, '#3f2f28'],
+        [0.53, 0.58, 0.10, 0.36, -0.16, '#c08a63'],
+        [0.72, 0.48, 0.11, 0.42, 0.30, '#6b3a2a'],
+        [0.88, 0.64, 0.09, 0.32, -0.24, '#3f2f28'],
+      ];
+      for (const [cx, cy, bw, bh, rot, col] of poses) {
+        blob(W * cx, H * cy, W * bw * 0.5, H * bh * 0.5, rot, col);
+        x.save();
+        x.translate(W * cx, H * cy);
+        x.rotate(rot);
+        x.fillStyle = col;
+        x.beginPath();
+        x.arc(0, -H * bh * 0.62, W * bw * 0.34, 0, Math.PI * 2);
+        x.fill();
+        x.restore();
+      }
+      break;
+    }
+    case 'galet':
+      blob(W * 0.54, H * 0.62, W * 0.29, H * 0.26, -0.2, P.ocre);
+      blob(W * 0.42, H * 0.26, W * 0.15, H * 0.05, -0.35, P.brun);
+      break;
+    case 'arche':
+      x.fillStyle = P.terre;
+      x.beginPath();
+      x.moveTo(W * 0.24, H * 0.82);
+      x.lineTo(W * 0.24, H * 0.44);
+      x.arc(W * 0.5, H * 0.44, W * 0.26, Math.PI, 0);
+      x.lineTo(W * 0.76, H * 0.82);
+      x.fill();
+      x.fillStyle = P.creme;
+      x.fillRect(W * 0.36, H * 0.58, W * 0.28, H * 0.24);
+      break;
+    case 'horizon': {
+      const bandes = [[0.42, 0.16, P.sable], [0.58, 0.09, P.terre], [0.67, 0.2, P.ardoise]];
+      for (const [y0, h, col] of bandes) {
+        x.fillStyle = col;
+        x.fillRect(W * 0.12, H * y0, W * 0.76, H * h);
+      }
+      break;
+    }
+    case 'feuille':
+      x.fillStyle = P.olive;
+      x.beginPath();
+      x.moveTo(W * 0.5, H * 0.16);
+      x.bezierCurveTo(W * 0.86, H * 0.36, W * 0.8, H * 0.72, W * 0.5, H * 0.86);
+      x.bezierCurveTo(W * 0.2, H * 0.72, W * 0.14, H * 0.36, W * 0.5, H * 0.16);
+      x.fill();
+      x.strokeStyle = P.creme;
+      x.lineWidth = 5;
+      x.beginPath();
+      x.moveTo(W * 0.5, H * 0.22);
+      x.lineTo(W * 0.5, H * 0.8);
+      x.stroke();
+      break;
+    case 'cercles':
+      blob(W * 0.4, H * 0.44, W * 0.24, W * 0.24, 0, P.terre);
+      blob(W * 0.62, H * 0.6, W * 0.2, W * 0.2, 0, P.ocre);
+      break;
+    case 'vague':
+      x.fillStyle = P.ardoise;
+      x.beginPath();
+      x.moveTo(0, H * 0.66);
+      x.bezierCurveTo(W * 0.3, H * 0.44, W * 0.7, H * 0.84, W, H * 0.56);
+      x.lineTo(W, H);
+      x.lineTo(0, H);
+      x.fill();
+      blob(W * 0.68, H * 0.28, W * 0.13, W * 0.13, 0, P.ocre);
+      break;
+    case 'colonnes': {
+      const cols = [P.terre, P.sable, P.brun, P.ocre];
+      for (let i = 0; i < 4; i++) {
+        x.fillStyle = cols[(i + seed) % cols.length];
+        const h = H * (0.34 + ((i * 7 + seed * 3) % 5) * 0.08);
+        x.fillRect(W * (0.16 + i * 0.18), H * 0.78 - h, W * 0.1, h);
+      }
+      break;
+    }
+    case 'lune':
+      blob(W * 0.5, H * 0.46, W * 0.28, W * 0.28, 0, P.creme);
+      blob(W * 0.63, H * 0.4, W * 0.24, W * 0.24, 0, P.fond[seed % P.fond.length]);
+      x.fillStyle = P.brun;
+      x.fillRect(W * 0.2, H * 0.76, W * 0.6, H * 0.03);
+      break;
+    default:
+      blob(W * 0.5, H * 0.5, W * 0.26, H * 0.2, 0, P.ocre);
+  }
+
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  artCache.set(id, t);
+  return t;
+}
+
 export function catalogEntry(type, catalogId) {
   const bank = type === 'shelf' ? SHELVES : type === 'frame' ? FRAMES : OBJECTS;
   return bank.find((e) => e.id === catalogId) || bank[0];
@@ -258,8 +414,10 @@ export function buildItem(item) {
     m.userData.pickable = true;
     g.add(m);
   } else if (item.type === 'frame') {
-    const art = buildFramedArt(item.w, item.h, woodMaterial(item.wood),
-      new THREE.MeshStandardMaterial({ color: item.canvasColor ?? 0xe8e1d4, roughness: 0.94 }));
+    const canvasMat = item.art
+      ? new THREE.MeshStandardMaterial({ map: artCanvasTexture(item.art, item.artSeed ?? 0), roughness: 0.94 })
+      : new THREE.MeshStandardMaterial({ color: item.canvasColor ?? 0xe8e1d4, roughness: 0.94 });
+    const art = buildFramedArt(item.w, item.h, woodMaterial(item.wood), canvasMat);
     art.traverse((o) => { if (o.isMesh) o.userData.pickable = true; });
     g.add(art);
   } else {

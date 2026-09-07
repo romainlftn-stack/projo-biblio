@@ -30,18 +30,20 @@ export const SHELVES = [
 
 /** Cadres et tableaux. Les 6 premiers sont les formats testés par maman. */
 export const FRAMES = [
-  { id: 'f200x300',  label: '20 × 30',   w: 0.20, h: 0.30, test: true },
-  { id: 'f300x200',  label: '30 × 20',   w: 0.30, h: 0.20, test: true },
-  { id: 'f300x300',  label: '30 × 30',   w: 0.30, h: 0.30, test: true },
-  { id: 'f600x400',  label: '60 × 40',   w: 0.60, h: 0.40, test: true },
-  { id: 'f800x600',  label: '80 × 60',   w: 0.80, h: 0.60, test: true },
-  { id: 'f600x800',  label: '60 × 80',   w: 0.60, h: 0.80, test: true },
-  { id: 'f400x400',  label: '40 × 40',   w: 0.40, h: 0.40 },
-  { id: 'f400x600',  label: '40 × 60',   w: 0.40, h: 0.60 },
-  { id: 'f500x700',  label: '50 × 70',   w: 0.50, h: 0.70 },
-  { id: 'f700x500',  label: '70 × 50',   w: 0.70, h: 0.50 },
-  { id: 'f1000x700', label: '100 × 70',  w: 1.00, h: 0.70 },
-  { id: 'f950x1220', label: '95 × 122',  w: 0.95, h: 1.22, note: 'tableau existant' },
+  { id: 'f200x300',  label: '20 × 30',   w: 0.20, h: 0.30, test: true, art: 'cercles' },
+  { id: 'f300x200',  label: '30 × 20',   w: 0.30, h: 0.20, test: true, art: 'horizon' },
+  { id: 'f300x300',  label: '30 × 30',   w: 0.30, h: 0.30, test: true, art: 'lune' },
+  { id: 'f600x400',  label: '60 × 40',   w: 0.60, h: 0.40, test: true, art: 'vague' },
+  { id: 'f800x600',  label: '80 × 60',   w: 0.80, h: 0.60, test: true, art: 'horizon' },
+  { id: 'f600x800',  label: '60 × 80',   w: 0.60, h: 0.80, test: true, art: 'galet' },
+  { id: 'f400x400',  label: '40 × 40',   w: 0.40, h: 0.40, art: 'cercles' },
+  { id: 'f400x600',  label: '40 × 60',   w: 0.40, h: 0.60, art: 'arche' },
+  { id: 'f500x700',  label: '50 × 70',   w: 0.50, h: 0.70, art: 'feuille' },
+  { id: 'f700x500',  label: '70 × 50',   w: 0.70, h: 0.50, art: 'vague' },
+  { id: 'f1000x700', label: '100 × 70',  w: 1.00, h: 0.70, art: 'colonnes' },
+  { id: 'f600x800b', label: '60 × 80 b', w: 0.60, h: 0.80, art: 'colonnes' },
+  { id: 'f-graine',  label: 'Tableau graine', w: 0.95, h: 1.22, art: 'graine', note: 'déjà au mur' },
+  { id: 'f-danse',   label: 'Tableau danse',  w: 1.20, h: 0.90, art: 'danse',  note: 'déjà au mur' },
 ];
 
 /**

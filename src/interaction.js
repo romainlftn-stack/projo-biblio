@@ -3,7 +3,7 @@
  * aimantations (grille, montants placo, alignement) et contrôle des collisions.
  */
 import * as THREE from 'three';
-import { FIXTURES, WALL, MIN_SHELF_WIDTH, ceilingAt, studPositions, snapPositions } from './config.js';
+import { FIXTURES, WALL, MIN_SHELF_WIDTH, SUPPORT_TOPS, ceilingAt, studPositions, snapPositions } from './config.js';
 import { itemBounds } from './items.js';
 import * as store from './store.js';
 
@@ -62,6 +62,20 @@ export function footprint(item) {
   return { x0: item.x - b.w / 2, x1: item.x + b.w / 2, y0: item.y + b.y0, y1: item.y + b.y0 + b.h };
 }
 
+/** Profondeur du centre d'un objet : sa valeur propre, sinon le milieu de son support. */
+export function objectDepth(item, items) {
+  if (Number.isFinite(item.z)) return item.z;
+  const sup = supportingSurface(item, items);
+  return sup ? sup.depth / 2 : 0.16;
+}
+
+/** Volume d'un objet, pour le confronter aux meubles existants. */
+function volume(item, items) {
+  const fp = footprint(item);
+  const z = objectDepth(item, items);
+  return { ...fp, z0: z - item.d / 2, z1: z + item.d / 2 };
+}
+
 const overlaps = (a, b, m = 0) =>
   a.x0 < b.x1 - m && a.x1 > b.x0 + m && a.y0 < b.y1 - m && a.y1 > b.y0 + m;
 
@@ -74,7 +88,22 @@ export function validate(item, items, settings = store.getState().settings) {
   const out = [];
   const err = (text) => out.push({ text, level: 'error' });
   const note = (text) => out.push({ text, level: 'note' });
-  if (item.type === 'object') return out;
+
+  if (item.type === 'object') {
+    // Un objet ne peut pas se retrouver dans un volume plein : le foyer, la
+    // hotte, le conduit. On confronte donc les trois dimensions, la seule
+    // emprise sur le mur ne suffirait pas.
+    const v = volume(item, items);
+    for (const f of FIXTURES) {
+      if (!f.blocks) continue;
+      const y1 = f.y1 ?? ceilingAt((f.x0 + f.x1) / 2);
+      if (overlaps(v, { x0: f.x0, x1: f.x1, y0: f.y0, y1 }, 0.005) && v.z0 < f.d - 0.005) {
+        err(`Traverse : ${f.label}.`);
+        break;
+      }
+    }
+    return out;
+  }
 
   const offset = settings.studOffset ?? 0.30;
   const spacing = settings.studSpacing ?? 0.60;
@@ -124,19 +153,36 @@ export function validate(item, items, settings = store.getState().settings) {
 /** Vrai si la pose comporte au moins un vrai défaut (et non une simple note). */
 export const hasError = (issues) => issues.some((i) => i.level === 'error');
 
-/** Étagère qui peut porter un objet à la position donnée. */
-export function supportingShelf(item, items) {
+/**
+ * Surface capable de porter un objet à cette position : une planche posée, ou
+ * le plateau d'un meuble existant (meuble bas, range-bûches, socle, vitrine).
+ */
+export function supportingSurface(item, items) {
   const fp = footprint(item);
   let best = null;
+  const consider = (top, depth, id) => {
+    const gap = item.y - top;
+    if (gap < -0.06 || gap > 0.40) return;
+    if (!best || top > best.top) best = { top, depth, id };
+  };
   for (const s of items) {
     if (s.type !== 'shelf' || s.id === item.id) continue;
     const sf = footprint(s);
     if (fp.x1 < sf.x0 + 0.02 || fp.x0 > sf.x1 - 0.02) continue;
-    const top = s.y + s.t;
-    const gap = item.y - top;
-    if (gap > -0.06 && gap < 0.40 && (!best || top > best.y + best.t)) best = s;
+    consider(s.y + s.t, s.d, s.id);
+  }
+  for (const f of FIXTURES) {
+    if (!SUPPORT_TOPS.includes(f.id)) continue;
+    if (fp.x1 < f.x0 + 0.02 || fp.x0 > f.x1 - 0.02) continue;
+    consider(f.y1, f.d, f.id);
   }
   return best;
+}
+
+/** Compatibilité : l'étagère qui porte l'objet, si c'en est une. */
+export function supportingShelf(item, items) {
+  const sup = supportingSurface(item, items);
+  return sup ? items.find((i) => i.id === sup.id) || null : null;
 }
 
 export class Interaction {
@@ -197,17 +243,22 @@ export class Interaction {
   syncHandles(item) {
     // Les objets de déco sont des étalons : on ne les redimensionne pas, et
     // leurs poignées ne feraient que gêner la prise pour les déplacer.
-    if (!item || item.type === 'object') { this.handles.visible = false; return; }
+    if (!item) { this.handles.visible = false; return; }
     const b = itemBounds(item);
     const cy = item.y + b.y0 + b.h / 2;
     const z = b.d / 2;
     const gap = 0.07;
-    this.handleMeshes.left.position.set(item.x - b.w / 2 - gap, cy, z);
-    this.handleMeshes.right.position.set(item.x + b.w / 2 + gap, cy, z);
-    this.handleMeshes.depth.position.set(item.x, cy, b.d + gap);
+    // Un objet garde sa taille : seule sa profondeur sur le meuble se règle.
+    const objet = item.type === 'object';
+    const zc = objet ? objectDepth(item, store.getState().items) : b.d / 2;
+    this.handleMeshes.left.position.set(item.x - b.w / 2 - gap, cy, zc);
+    this.handleMeshes.right.position.set(item.x + b.w / 2 + gap, cy, zc);
+    this.handleMeshes.left.visible = !objet;
+    this.handleMeshes.right.visible = !objet;
+    this.handleMeshes.depth.position.set(item.x, cy, (objet ? zc + b.d / 2 : b.d) + gap);
     this.handleMeshes.depth.visible = item.type !== 'frame';
-    this.handleMeshes.top.position.set(item.x, item.y + b.y0 + b.h + gap, z);
-    this.handleMeshes.top.visible = item.type !== 'shelf';
+    this.handleMeshes.top.position.set(item.x, item.y + b.y0 + b.h + gap, zc);
+    this.handleMeshes.top.visible = item.type === 'frame';
     this.handles.visible = true;
     this.scaleHandles();
   }
@@ -371,9 +422,16 @@ export class Interaction {
     const patch = { x, y };
     if (item.type === 'object') {
       const probe = { ...item, x, y };
-      const shelf = supportingShelf(probe, store.getState().items);
-      if (shelf && !free) { patch.y = shelf.y + shelf.t; patch.onShelf = shelf.id; }
-      else patch.onShelf = null;
+      const sup = supportingSurface(probe, store.getState().items);
+      if (sup && !free) {
+        patch.y = sup.top;
+        patch.onShelf = sup.id;
+        const half = item.d / 2;
+        const zMax = Math.max(sup.depth - half, half);
+        patch.z = Math.min(Math.max(objectDepth(item, store.getState().items), half), zMax);
+      } else {
+        patch.onShelf = null;
+      }
     }
     store.updateItem(item.id, patch, { transient: true });
     this.drawGuides(guides);
@@ -406,7 +464,18 @@ export class Interaction {
     } else if (this.drag.edge === 'depth') {
       const ax = this.drag.axis;
       const along = ((e.clientX - this.drag.client.x) * ax.x + (e.clientY - this.drag.client.y) * ax.y) / ax.pxPerM;
-      patch.d = Math.max(0.08, Math.min(0.60, round(st.d + along)));
+      if (item.type === 'object') {
+        // Sur un objet, la poignée ne change pas la taille : elle l'avance ou
+        // le recule sur son support.
+        const items = store.getState().items;
+        const sup = supportingSurface(item, items);
+        const half = item.d / 2;
+        const zMax = sup ? Math.max(sup.depth - half, half) : 0.6;
+        const base = Number.isFinite(st.z) ? st.z : objectDepth(st, items);
+        patch.z = Math.min(Math.max(round(base + along), half), zMax);
+      } else {
+        patch.d = Math.max(0.08, Math.min(0.60, round(st.d + along)));
+      }
     }
     store.updateItem(item.id, patch, { transient: true });
   }
