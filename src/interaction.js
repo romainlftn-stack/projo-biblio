@@ -16,56 +16,6 @@ const WALL_PLANE = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
  */
 const chevronCache = new Map();
 
-/**
- * Poignée de profondeur : le mur vu de profil, la pièce en débord, et la cote
- * qu'on règle. Dessinée en aplats sur une vignette large — en carré et en
- * traits fins, les trois éléments se tassaient et ne se lisaient plus.
- */
-export const PILL_RATIO = 220 / 100;
-const pillCache = new Map();
-function pillTexture(mode) {
-  if (pillCache.has(mode)) return pillCache.get(mode);
-  const c = document.createElement('canvas');
-  c.width = 220;
-  c.height = 100;
-  const x = c.getContext('2d');
-  const bleu = '#9dbecd';
-  const ombre = 'rgba(18,14,11,.55)';
-
-  const plein = (fn) => {
-    x.lineWidth = 9;
-    x.lineJoin = 'round';
-    x.strokeStyle = ombre;
-    fn(); x.stroke();
-    x.fillStyle = bleu;
-    fn(); x.fill();
-  };
-
-  plein(() => { x.beginPath(); x.roundRect(10, 8, 26, 84, 5); });         // le mur, de profil
-  if (mode === 'objet') {
-    plein(() => { x.beginPath(); x.roundRect(36, 46, 152, 14, 4); });     // le plateau
-    plein(() => { x.beginPath(); x.roundRect(98, 18, 30, 28, 5); });      // l'objet posé
-  } else {
-    plein(() => { x.beginPath(); x.roundRect(36, 36, 152, 24, 5); });     // la planche
-  }
-
-  x.lineCap = 'round';
-  x.lineJoin = 'round';
-  for (const col of [ombre, bleu]) {
-    x.strokeStyle = col;
-    x.lineWidth = col === ombre ? 19 : 11;
-    x.beginPath();
-    x.moveTo(40, 78); x.lineTo(196, 78);
-    x.moveTo(56, 66); x.lineTo(40, 78); x.lineTo(56, 90);
-    x.moveTo(180, 66); x.lineTo(196, 78); x.lineTo(180, 90);
-    x.stroke();
-  }
-
-  const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.SRGBColorSpace;
-  pillCache.set(mode, t);
-  return t;
-}
 function chevronTexture(glyph, rot, color) {
   const key = glyph + rot.toFixed(2) + color;
   if (chevronCache.has(key)) return chevronCache.get(key);
@@ -260,14 +210,13 @@ export class Interaction {
     g.name = 'poignees';
     this.handleMeshes = {};
     const specs = [
-      ['left',  'chevron', Math.PI, 0xffc857],
-      ['right', 'chevron', 0, 0xffc857],
-      ['top',   'chevron', -Math.PI / 2, 0xffc857],
-      ['depth', 'pill', 0, 0],
+      ['left',  Math.PI, 0xffc857],
+      ['right', 0, 0xffc857],
+      ['top',   -Math.PI / 2, 0xffc857],
     ];
-    for (const [key, glyph, rot, color] of specs) {
+    for (const [key, rot, color] of specs) {
       const sp = new THREE.Sprite(new THREE.SpriteMaterial({
-        map: glyph === 'pill' ? pillTexture('planche') : chevronTexture(glyph, rot, color),
+        map: chevronTexture('chevron', rot, color),
         depthTest: false,
         transparent: true,
       }));
@@ -276,6 +225,32 @@ export class Interaction {
       g.add(sp);
       this.handleMeshes[key] = sp;
     }
+
+    /*
+     * Profondeur : aucune vignette. Quatre pictogrammes successifs ont échoué
+     * à dire « ceci règle la profondeur ». On prend le chemin des outils 3D :
+     * la poignée EST le chant de la pièce. On tire le bord avant, le geste
+     * n'a plus besoin d'être expliqué.
+     */
+    const lip = new THREE.Mesh(
+      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.MeshBasicMaterial({ color: 0x86b3c4, depthTest: false })
+    );
+    lip.renderOrder = 999;
+    lip.userData.handle = 'depth';
+    g.add(lip);
+    this.handleMeshes.depth = lip;
+
+    // Zone de préhension invisible : la barre visible reste fine, mais on ne
+    // doit pas avoir à viser au pixel près pour l'attraper.
+    const grip = new THREE.Mesh(
+      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false })
+    );
+    grip.userData.handle = 'depth';
+    grip.userData.grip = true;
+    g.add(grip);
+    this.handleMeshes.depthGrip = grip;
     g.visible = false;
     return g;
   }
@@ -295,19 +270,20 @@ export class Interaction {
     const gap = 0.07;
     // Un objet garde sa taille : seule sa profondeur sur le meuble se règle.
     const objet = item.type === 'object';
-    const mode = objet ? 'objet' : 'planche';
-    if (this.handleMeshes.depth.userData.mode !== mode) {
-      this.handleMeshes.depth.userData.mode = mode;
-      this.handleMeshes.depth.material.map = pillTexture(mode);
-      this.handleMeshes.depth.material.needsUpdate = true;
-    }
     const zc = objet ? objectDepth(item, store.getState().items) : b.d / 2;
     this.handleMeshes.left.position.set(item.x - b.w / 2 - gap, cy, zc);
     this.handleMeshes.right.position.set(item.x + b.w / 2 + gap, cy, zc);
     this.handleMeshes.left.visible = !objet;
     this.handleMeshes.right.visible = !objet;
-    this.handleMeshes.depth.position.set(item.x, cy, (objet ? zc + b.d / 2 : b.d) + gap);
-    this.handleMeshes.depth.visible = item.type !== 'frame';
+    const lip = this.handleMeshes.depth;
+    const zLip = objet ? zc + b.d / 2 : b.d;
+    lip.position.set(item.x, cy, zLip);
+    lip.userData.spanX = b.w;
+    lip.visible = item.type !== 'frame';
+    const grip = this.handleMeshes.depthGrip;
+    grip.position.copy(lip.position);
+    grip.userData.spanX = b.w;
+    grip.visible = lip.visible;
     this.handleMeshes.top.position.set(item.x, item.y + b.y0 + b.h + gap, zc);
     this.handleMeshes.top.visible = item.type === 'frame';
     this.handles.visible = true;
@@ -324,8 +300,14 @@ export class Interaction {
     const k = (2 * Math.tan((this.camera.fov * Math.PI) / 360)) / h;
     for (const m of this.handles.children) {
       const s = this.handlePx * k * this.camera.position.distanceTo(m.position);
-      if (m.userData.handle === 'depth') m.scale.set(s * PILL_RATIO * 1.18, s * 1.18, 1);
-      else m.scale.set(s, s, 1);
+      if (m.userData.handle === 'depth') {
+        // La barre garde la longueur de la pièce, et une épaisseur lisible
+        // quel que soit le zoom. Sa zone de préhension est bien plus large.
+        const e = m.userData.grip ? s * 1.05 : s * 0.34;
+        m.scale.set(m.userData.spanX ?? 1, e, e);
+      } else {
+        m.scale.set(s, s, 1);
+      }
     }
   }
 
