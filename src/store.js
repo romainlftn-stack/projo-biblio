@@ -183,9 +183,14 @@ export function select(id) {
   emit('select');
 }
 
+/**
+ * Vider remet le mur nu, mais garde les deux tableaux déjà accrochés : ils
+ * font partie du salon, pas de la projection. On peut toujours les supprimer
+ * un par un, et les reprendre au catalogue.
+ */
 export function clearAll() {
   pushHistory();
-  state.items = [];
+  state.items = defaultItems();
   state.selection = null;
   emit('clear');
 }

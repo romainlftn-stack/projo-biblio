@@ -370,7 +370,9 @@ function bindFiles() {
   $('#btn-save').addEventListener('click', saveToFile);
   $('#btn-clear').addEventListener('click', () => {
     if (!store.getState().items.length) return;
-    if (confirm('Vider la projection ? Un Cmd+Z permet de revenir en arrière.')) store.clearAll();
+    if (confirm('Vider la projection ? Les deux tableaux du salon restent en place. Un Cmd+Z permet de revenir en arrière.')) {
+      store.clearAll();
+    }
   });
 
   for (const target of [dz, document.getElementById('stage'), document.body]) {

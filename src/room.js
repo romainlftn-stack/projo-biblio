@@ -318,7 +318,7 @@ function buildFurniture() {
   // Fauteuil en diagonale, côté avant droit du tapis
   const chair = armchair(cream, wood);
   chair.position.set(5.55, 0, 2.85);
-  chair.rotation.y = -2.5;
+  chair.rotation.y = -2.5 + Math.PI / 2;   // quart de tour vers la gauche
   g.add(chair);
 
   // Trois plantes devant la baie
