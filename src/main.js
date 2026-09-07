@@ -321,16 +321,25 @@ function setWarnings(list) {
 }
 
 /*
- * ⌘ (ou Ctrl) maintenu : le glisser translate au lieu de pivoter. Au trackpad
- * c'est bien plus praticable que le clic droit.
+ * OrbitControls translate déjà nativement quand ⌘ / Ctrl / Maj est enfoncé :
+ * forcer nous-mêmes `mouseButtons.LEFT = PAN` déclenchait son inversion
+ * interne, qui repassait en rotation — le raccourci ne marchait plus.
+ * Reste à ajouter la barre d'espace, qu'il ne gère pas.
  */
-function setPanModifier(on) {
+function setSpacePan(on) {
   controls.mouseButtons.LEFT = on ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
+  interaction.panModifier = on;
   stage.classList.toggle('is-panning', on);
 }
-window.addEventListener('keydown', (e) => { if (e.key === 'Meta' || e.key === 'Control') setPanModifier(true); });
-window.addEventListener('keyup', (e) => { if (e.key === 'Meta' || e.key === 'Control') setPanModifier(false); });
-window.addEventListener('blur', () => setPanModifier(false));
+window.addEventListener('keydown', (e) => {
+  if (e.code !== 'Space' || e.repeat) return;
+  const saisie = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || '');
+  if (saisie) return;
+  e.preventDefault();          // sinon la barre défile la page ou active un bouton
+  setSpacePan(true);
+});
+window.addEventListener('keyup', (e) => { if (e.code === 'Space') setSpacePan(false); });
+window.addEventListener('blur', () => setSpacePan(false));
 
 /* ------------------------------------------------------------ raccourcis */
 

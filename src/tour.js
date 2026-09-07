@@ -8,7 +8,7 @@ const STEPS = [
     list: [
       ['Pivoter autour du mur', 'un doigt sur le trackpad, ou clic gauche maintenu, et on fait glisser.'],
       ['Avancer / reculer', 'deux doigts qui glissent vers le haut ou vers le bas, ou la molette.'],
-      ['Se décaler sans pivoter', 'maintenir ⌘ et faire glisser. Le clic droit maintenu fait la même chose.'],
+      ['Se décaler sans pivoter', 'maintenir ⌘ ou la barre d’espace et faire glisser. Le clic droit maintenu fait la même chose.'],
       ['Revenir à une vue nette', 'les cinq boutons en haut (Face, Large, ¾ gauche, ¾ droite, Rasante).'],
     ],
   },

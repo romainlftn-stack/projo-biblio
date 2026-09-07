@@ -17,53 +17,53 @@ const WALL_PLANE = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 const chevronCache = new Map();
 
 /**
- * Poignée de profondeur : une pastille écrite.
- * Deux pictogrammes successifs — double flèche puis mur coté — n'ont pas suffi
- * à dire « ceci règle la profondeur ». Le mot lève l'ambiguïté d'un coup.
+ * Poignée de profondeur : le mur vu de profil, la pièce en débord, et la cote
+ * qu'on règle. Dessinée en aplats sur une vignette large — en carré et en
+ * traits fins, les trois éléments se tassaient et ne se lisaient plus.
  */
-export const PILL_RATIO = 256 / 72;
+export const PILL_RATIO = 220 / 100;
 const pillCache = new Map();
-function pillTexture(mot) {
-  if (pillCache.has(mot)) return pillCache.get(mot);
+function pillTexture(mode) {
+  if (pillCache.has(mode)) return pillCache.get(mode);
   const c = document.createElement('canvas');
-  c.width = 256;
-  c.height = 72;
+  c.width = 220;
+  c.height = 100;
   const x = c.getContext('2d');
-  const r = 26;
-  x.beginPath();
-  x.moveTo(r + 6, 6);
-  x.arcTo(250, 6, 250, 66, r);
-  x.arcTo(250, 66, 6, 66, r);
-  x.arcTo(6, 66, 6, 6, r);
-  x.arcTo(6, 6, 250, 6, r);
-  x.closePath();
-  x.fillStyle = '#9dbecd';
-  x.fill();
-  x.lineWidth = 6;
-  x.strokeStyle = 'rgba(18,14,11,.55)';
-  x.stroke();
+  const bleu = '#9dbecd';
+  const ombre = 'rgba(18,14,11,.55)';
 
-  x.fillStyle = '#1d2b33';
-  x.font = '600 30px ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif';
-  x.textAlign = 'center';
-  x.textBaseline = 'middle';
-  x.fillText(mot, 128, 38);
+  const plein = (fn) => {
+    x.lineWidth = 9;
+    x.lineJoin = 'round';
+    x.strokeStyle = ombre;
+    fn(); x.stroke();
+    x.fillStyle = bleu;
+    fn(); x.fill();
+  };
 
-  // deux chevrons en bout : on tire d'un côté ou de l'autre
-  x.lineWidth = 6;
+  plein(() => { x.beginPath(); x.roundRect(10, 8, 26, 84, 5); });         // le mur, de profil
+  if (mode === 'objet') {
+    plein(() => { x.beginPath(); x.roundRect(36, 46, 152, 14, 4); });     // le plateau
+    plein(() => { x.beginPath(); x.roundRect(98, 18, 30, 28, 5); });      // l'objet posé
+  } else {
+    plein(() => { x.beginPath(); x.roundRect(36, 36, 152, 24, 5); });     // la planche
+  }
+
   x.lineCap = 'round';
   x.lineJoin = 'round';
-  x.strokeStyle = '#1d2b33';
-  for (const [px, dir] of [[30, -1], [226, 1]]) {
+  for (const col of [ombre, bleu]) {
+    x.strokeStyle = col;
+    x.lineWidth = col === ombre ? 19 : 11;
     x.beginPath();
-    x.moveTo(px - 7 * dir, 24);
-    x.lineTo(px + 7 * dir, 36);
-    x.lineTo(px - 7 * dir, 48);
+    x.moveTo(40, 78); x.lineTo(196, 78);
+    x.moveTo(56, 66); x.lineTo(40, 78); x.lineTo(56, 90);
+    x.moveTo(180, 66); x.lineTo(196, 78); x.lineTo(180, 90);
     x.stroke();
   }
+
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
-  pillCache.set(mot, t);
+  pillCache.set(mode, t);
   return t;
 }
 function chevronTexture(glyph, rot, color) {
@@ -241,6 +241,7 @@ export class Interaction {
     this.pointer = new THREE.Vector2();
     this.drag = null;
     this.navOnly = false;
+    this.panModifier = false;
     // Au doigt, il faut une cible plus généreuse qu'à la souris.
     this.handlePx = window.matchMedia('(pointer: coarse)').matches ? 46 : 30;
     this.guides = new THREE.Group();
@@ -266,7 +267,7 @@ export class Interaction {
     ];
     for (const [key, glyph, rot, color] of specs) {
       const sp = new THREE.Sprite(new THREE.SpriteMaterial({
-        map: glyph === 'pill' ? pillTexture('Profondeur') : chevronTexture(glyph, rot, color),
+        map: glyph === 'pill' ? pillTexture('planche') : chevronTexture(glyph, rot, color),
         depthTest: false,
         transparent: true,
       }));
@@ -294,10 +295,10 @@ export class Interaction {
     const gap = 0.07;
     // Un objet garde sa taille : seule sa profondeur sur le meuble se règle.
     const objet = item.type === 'object';
-    const mot = objet ? 'Recul' : 'Profondeur';
-    if (this.handleMeshes.depth.userData.mot !== mot) {
-      this.handleMeshes.depth.userData.mot = mot;
-      this.handleMeshes.depth.material.map = pillTexture(mot);
+    const mode = objet ? 'objet' : 'planche';
+    if (this.handleMeshes.depth.userData.mode !== mode) {
+      this.handleMeshes.depth.userData.mode = mode;
+      this.handleMeshes.depth.material.map = pillTexture(mode);
       this.handleMeshes.depth.material.needsUpdate = true;
     }
     const zc = objet ? objectDepth(item, store.getState().items) : b.d / 2;
@@ -323,7 +324,7 @@ export class Interaction {
     const k = (2 * Math.tan((this.camera.fov * Math.PI) / 360)) / h;
     for (const m of this.handles.children) {
       const s = this.handlePx * k * this.camera.position.distanceTo(m.position);
-      if (m.userData.handle === 'depth') m.scale.set(s * PILL_RATIO * 0.78, s * 0.78, 1);
+      if (m.userData.handle === 'depth') m.scale.set(s * PILL_RATIO * 1.18, s * 1.18, 1);
       else m.scale.set(s, s, 1);
     }
   }
@@ -379,8 +380,9 @@ export class Interaction {
   }
 
   onDown(e) {
-    // ⌘ / Ctrl maintenu : le glisser appartient à la navigation, pas à l'édition.
-    if (e.button !== 0 || this.navOnly || e.metaKey || e.ctrlKey) return;
+    // ⌘ / Ctrl / Maj / Espace : le glisser appartient à la navigation.
+    if (e.button !== 0 || this.navOnly || this.panModifier
+        || e.metaKey || e.ctrlKey || e.shiftKey) return;
     this.setPointer(e);
 
     if (this.handles.visible) {
