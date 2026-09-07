@@ -259,7 +259,9 @@ function armchair(cream, wood) {
   seat.position.set(0, 0.40, 0);
   const back = box(0.78, 0.62, 0.16, cream);
   back.position.set(0, 0.78, -0.32);
-  back.rotation.x = 0.16;
+  // Rotation X positive = le haut du dossier bascule vers +z, donc vers
+  // l'assise : il penchait en avant. Négative, il s'incline en arrière.
+  back.rotation.x = -0.15;
   const armL = box(0.10, 0.16, 0.68, wood);
   armL.position.set(-0.40, 0.58, 0.02);
   const armR = armL.clone();
