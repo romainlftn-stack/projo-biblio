@@ -411,6 +411,8 @@ controls.addEventListener('start', () => { userMovedCamera = true; });
 function resize() {
   const w = Math.max(stage.clientWidth, 1);
   const h = Math.max(stage.clientHeight, 1);
+  if (renderer.domElement.width === Math.floor(w * renderer.getPixelRatio())
+      && renderer.domElement.height === Math.floor(h * renderer.getPixelRatio())) return;
   renderer.setSize(w, h, false);
   labelRenderer.setSize(w, h);
   camera.aspect = w / h;
@@ -438,6 +440,10 @@ function tick() {
     if (flight.t >= 1) flight = null;
   }
 
+  // Filet de sécurité : les callbacks de ResizeObserver ne sont pas livrés
+  // quand la page est mise en pause (onglet masqué). Sans cette vérification,
+  // le canevas peut rester figé à une taille prise pendant la pause.
+  resize();
   controls.update();
   updateEnvelopeFade(room, camera);
   interaction.scaleHandles();

@@ -15,6 +15,57 @@ const WALL_PLANE = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
  * à la caméra et lisible sous tous les angles.
  */
 const chevronCache = new Map();
+
+/**
+ * Poignée de profondeur : une pastille écrite.
+ * Deux pictogrammes successifs — double flèche puis mur coté — n'ont pas suffi
+ * à dire « ceci règle la profondeur ». Le mot lève l'ambiguïté d'un coup.
+ */
+export const PILL_RATIO = 256 / 72;
+const pillCache = new Map();
+function pillTexture(mot) {
+  if (pillCache.has(mot)) return pillCache.get(mot);
+  const c = document.createElement('canvas');
+  c.width = 256;
+  c.height = 72;
+  const x = c.getContext('2d');
+  const r = 26;
+  x.beginPath();
+  x.moveTo(r + 6, 6);
+  x.arcTo(250, 6, 250, 66, r);
+  x.arcTo(250, 66, 6, 66, r);
+  x.arcTo(6, 66, 6, 6, r);
+  x.arcTo(6, 6, 250, 6, r);
+  x.closePath();
+  x.fillStyle = '#9dbecd';
+  x.fill();
+  x.lineWidth = 6;
+  x.strokeStyle = 'rgba(18,14,11,.55)';
+  x.stroke();
+
+  x.fillStyle = '#1d2b33';
+  x.font = '600 30px ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif';
+  x.textAlign = 'center';
+  x.textBaseline = 'middle';
+  x.fillText(mot, 128, 38);
+
+  // deux chevrons en bout : on tire d'un côté ou de l'autre
+  x.lineWidth = 6;
+  x.lineCap = 'round';
+  x.lineJoin = 'round';
+  x.strokeStyle = '#1d2b33';
+  for (const [px, dir] of [[30, -1], [226, 1]]) {
+    x.beginPath();
+    x.moveTo(px - 7 * dir, 24);
+    x.lineTo(px + 7 * dir, 36);
+    x.lineTo(px - 7 * dir, 48);
+    x.stroke();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  pillCache.set(mot, t);
+  return t;
+}
 function chevronTexture(glyph, rot, color) {
   const key = glyph + rot.toFixed(2) + color;
   if (chevronCache.has(key)) return chevronCache.get(key);
@@ -31,14 +82,7 @@ function chevronTexture(glyph, rot, color) {
    * ou descendre la planche. Le pictogramme est donc fixe et littéral : le
    * mur à gauche, la planche en débord, et la cote qu'on règle en dessous.
    */
-  const paths = glyph === 'depth'
-    ? [
-        [[-46, -42], [-46, 42]],              // le mur, vu de profil
-        [[-30, 0], [46, 0]],                  // la cote qui s'en éloigne
-        [[-16, -15], [-30, 0], [-16, 15]],    // pointe côté mur
-        [[32, -15], [46, 0], [32, 15]],       // pointe côté pièce
-      ]
-    : [[[-16, -30], [18, 0], [-16, 30]]];
+  const paths = [[[-16, -30], [18, 0], [-16, 30]]];
   for (const pass of [{ w: 24, c: 'rgba(18,14,11,.5)' }, { w: 13, c: '#' + color.toString(16).padStart(6, '0') }]) {
     x.lineWidth = pass.w;
     x.strokeStyle = pass.c;
@@ -218,11 +262,11 @@ export class Interaction {
       ['left',  'chevron', Math.PI, 0xffc857],
       ['right', 'chevron', 0, 0xffc857],
       ['top',   'chevron', -Math.PI / 2, 0xffc857],
-      ['depth', 'depth', 0, 0x9dbecd],
+      ['depth', 'pill', 0, 0],
     ];
     for (const [key, glyph, rot, color] of specs) {
       const sp = new THREE.Sprite(new THREE.SpriteMaterial({
-        map: chevronTexture(glyph, rot, color),
+        map: glyph === 'pill' ? pillTexture('Profondeur') : chevronTexture(glyph, rot, color),
         depthTest: false,
         transparent: true,
       }));
@@ -250,6 +294,12 @@ export class Interaction {
     const gap = 0.07;
     // Un objet garde sa taille : seule sa profondeur sur le meuble se règle.
     const objet = item.type === 'object';
+    const mot = objet ? 'Recul' : 'Profondeur';
+    if (this.handleMeshes.depth.userData.mot !== mot) {
+      this.handleMeshes.depth.userData.mot = mot;
+      this.handleMeshes.depth.material.map = pillTexture(mot);
+      this.handleMeshes.depth.material.needsUpdate = true;
+    }
     const zc = objet ? objectDepth(item, store.getState().items) : b.d / 2;
     this.handleMeshes.left.position.set(item.x - b.w / 2 - gap, cy, zc);
     this.handleMeshes.right.position.set(item.x + b.w / 2 + gap, cy, zc);
@@ -273,7 +323,8 @@ export class Interaction {
     const k = (2 * Math.tan((this.camera.fov * Math.PI) / 360)) / h;
     for (const m of this.handles.children) {
       const s = this.handlePx * k * this.camera.position.distanceTo(m.position);
-      m.scale.set(s, s, 1);
+      if (m.userData.handle === 'depth') m.scale.set(s * PILL_RATIO * 0.78, s * 0.78, 1);
+      else m.scale.set(s, s, 1);
     }
   }
 
