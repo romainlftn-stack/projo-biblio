@@ -16,6 +16,36 @@ const el = (tag, cls, text) => {
 let ctx = null;
 let activeTab = 'shelf';
 
+/** Compositions livrées avec l'outil, à charger comme point de départ. */
+const EXEMPLES = [
+  ['escalier',  'Escalier',        'Des planches qui montent de gauche à droite.'],
+  ['colonnes',  'Deux colonnes',   'Deux piles cadrant le grand tableau.'],
+  ['traverse',  'Grande traverse', 'Une planche de 3 m en socle, puis plus court.'],
+  ['galerie',   'Galerie',         'Peu de planches, des cadres en constellation.'],
+  ['asymetrie', 'Asymétrie',       'Un côté gauche dense, un droit qui respire.'],
+];
+
+function bindExemples() {
+  const liste = $('#exemples-liste');
+  for (const [fichier, nom, sous] of EXEMPLES) {
+    const b = el('button', 'exemple');
+    b.type = 'button';
+    b.append(el('b', null, nom), el('span', null, sous));
+    b.addEventListener('click', async () => {
+      try {
+        const rep = await fetch(`./exemples/${fichier}.json`);
+        if (!rep.ok) throw new Error(rep.status);
+        const r = store.fromJSON(await rep.json());
+        ctx.toast(r.ok ? `« ${nom} » chargée — ${r.count} pièces.` : r.error, r.ok ? 'info' : 'error');
+        closeDrawerAfterAction();
+      } catch {
+        ctx.toast('Exemple introuvable.', 'error');
+      }
+    });
+    liste.append(b);
+  }
+}
+
 /* ------------------------------------------------------ tiroir mobile */
 
 /**
@@ -47,6 +77,7 @@ export function initUI(context) {
   ctx = context;
   bindDrawer();
   bindTabs();
+  bindExemples();
   bindSettings();
   bindFiles();
   bindToolbar();

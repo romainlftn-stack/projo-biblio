@@ -76,6 +76,29 @@ html, body {
 .panel-body::-webkit-scrollbar-thumb { background: #37302a; border-radius: 9px; }
 
 .block { padding: 13px 14px; border-top: 1px solid var(--line); }
+details > summary {
+  cursor: pointer; list-style: none; user-select: none;
+  font-size: 11px; text-transform: uppercase; letter-spacing: .09em;
+  color: var(--muted); font-weight: 650;
+  display: flex; align-items: center; gap: 6px;
+}
+details > summary::-webkit-details-marker { display: none; }
+details > summary::before {
+  content: "▸"; font-size: 9px; transition: transform .15s; color: var(--wood);
+}
+details[open] > summary::before { transform: rotate(90deg); }
+details > summary:hover { color: var(--text); }
+
+.exemples { display: grid; gap: 5px; margin-top: 9px; }
+.exemple {
+  display: block; width: 100%; text-align: left; cursor: pointer;
+  padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--panel-2); color: inherit; font: inherit;
+}
+.exemple:hover { border-color: var(--wood); background: #2c2620; }
+.exemple b { display: block; font-size: 12.5px; font-weight: 600; }
+.exemple span { display: block; font-size: 10.5px; color: var(--muted); line-height: 1.35; margin-top: 1px; }
+
 .block h2 { margin: 0 0 9px; font-size: 11px; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); font-weight: 650; }
 
 /* ------------------------------------------------------------ banque */

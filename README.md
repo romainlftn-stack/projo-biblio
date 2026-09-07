@@ -91,15 +91,37 @@ tableau existant (95 × 122).
 - **Redimensionner** : les pastilles jaunes aux extrémités changent la
   longueur, celle de devant la profondeur. `Maj` conserve les proportions,
   `Alt` ignore les aimants.
-- **Meubler** : un objet lâché au-dessus d'une planche s'y pose tout seul.
+- **Meubler** : un objet lâché au-dessus d'une planche s'y pose tout seul. Le
+  meuble bas, le range-bûches, le socle et le dessus de la vitrine portent des
+  objets au même titre. La poignée bleutée, ou le champ « Recul / mur »,
+  avance ou recule l'objet sur son plateau. On ne peut rien poser dans le
+  foyer, la hotte ni le conduit.
 - **Enregistrer** : bouton *Enregistrer* → fichier `.json`. Pour reprendre,
   glisser ce fichier sur la zone en bas du panneau. Le travail en cours est
   aussi gardé automatiquement dans le navigateur.
 - **Raccourcis** : `Cmd+Z` / `Cmd+Maj+Z`, `Cmd+S`, `D` pour dupliquer,
   `Suppr` pour supprimer, `Échap` pour désélectionner.
 
-`exemples/proposition-de-depart.json` contient une première proposition
-(8 planches, 10,60 m linéaires) à charger pour démarrer.
+## Les compositions d'exemple
+
+Cinq compositions sont livrées avec l'outil, sous « Compositions d'exemple »
+dans le panneau (replié par défaut, il ne prend qu'une ligne) :
+
+| Nom | Parti pris |
+|---|---|
+| Escalier | Des planches qui montent de gauche à droite. |
+| Deux colonnes | Deux piles cadrant le grand tableau. |
+| Grande traverse | Une planche de 3 m en socle, puis des lignes plus courtes. |
+| Galerie | Peu de planches, des cadres en constellation. |
+| Asymétrie | Un côté gauche dense, un côté droit qui respire. |
+
+Elles sont produites par un générateur qui rejoue la validation de l'outil,
+donc aucune ne comporte de défaut de pose. Les seules remarques qui subsistent
+sont les notes de trame sur les planches de moins de 127 cm.
+
+Les deux toiles du salon sont des cadres ordinaires : on peut les déplacer, les
+supprimer, et les reprendre au catalogue. Elles sont posées dans tout projet
+neuf à l'emplacement relevé sur les photos.
 
 ## Technique
 
