@@ -1,7 +1,7 @@
 {
  "format": "projo-biblio",
  "version": 1,
- "savedAt": "2026-09-07T09:00:00.000Z",
+ "savedAt": "2026-09-23T09:00:00.000Z",
  "name": "Asymétrie",
  "description": "Un côté gauche dense, un côté droit qui respire.",
  "settings": {
@@ -93,29 +93,17 @@
   {
    "id": "x07",
    "type": "shelf",
-   "catalogId": "s1200",
-   "label": "Courante",
-   "x": 6.05,
-   "y": 1.25,
+   "catalogId": "s2100",
+   "label": "XL",
+   "x": 6.9,
+   "y": 1.35,
    "wood": "chene-dore",
-   "w": 1.05,
-   "d": 0.25,
-   "t": 0.04
+   "w": 2.1,
+   "d": 0.3,
+   "t": 0.045
   },
   {
    "id": "x08",
-   "type": "shelf",
-   "catalogId": "s1500",
-   "label": "Moyenne",
-   "x": 7.3,
-   "y": 2.35,
-   "wood": "chene-dore",
-   "w": 1.4,
-   "d": 0.25,
-   "t": 0.04
-  },
-  {
-   "id": "x09",
    "type": "object",
    "catalogId": "plante-p",
    "label": "plante-p",
@@ -129,7 +117,7 @@
    "color": 6257226
   },
   {
-   "id": "x10",
+   "id": "x09",
    "type": "object",
    "catalogId": "livres-deb",
    "label": "livres-deb",
@@ -143,7 +131,7 @@
    "color": 8216394
   },
   {
-   "id": "x11",
+   "id": "x10",
    "type": "object",
    "catalogId": "vase-haut",
    "label": "vase-haut",
@@ -157,7 +145,7 @@
    "color": 14208444
   },
   {
-   "id": "x12",
+   "id": "x11",
    "type": "object",
    "catalogId": "bol",
    "label": "bol",
@@ -171,7 +159,7 @@
    "color": 13616046
   },
   {
-   "id": "x13",
+   "id": "x12",
    "type": "object",
    "catalogId": "appareil",
    "label": "appareil",
@@ -185,7 +173,7 @@
    "color": 3814962
   },
   {
-   "id": "x14",
+   "id": "x13",
    "type": "object",
    "catalogId": "boite",
    "label": "boite",
@@ -199,7 +187,7 @@
    "color": 10259054
   },
   {
-   "id": "x15",
+   "id": "x14",
    "type": "object",
    "catalogId": "vase-boule",
    "label": "vase-boule",
@@ -213,7 +201,7 @@
    "color": 12892582
   },
   {
-   "id": "x16",
+   "id": "x15",
    "type": "object",
    "catalogId": "statuette",
    "label": "statuette",
@@ -227,7 +215,7 @@
    "color": 11905170
   },
   {
-   "id": "x17",
+   "id": "x16",
    "type": "object",
    "catalogId": "livres-pile",
    "label": "livres-pile",
@@ -241,7 +229,7 @@
    "color": 9072476
   },
   {
-   "id": "x18",
+   "id": "x17",
    "type": "object",
    "catalogId": "bougeoir",
    "label": "bougeoir",
@@ -255,7 +243,7 @@
    "color": 10127986
   },
   {
-   "id": "x19",
+   "id": "x18",
    "type": "object",
    "catalogId": "vase-long",
    "label": "vase-long",
@@ -269,7 +257,7 @@
    "color": 12167570
   },
   {
-   "id": "x20",
+   "id": "x19",
    "type": "object",
    "catalogId": "cadre-photo",
    "label": "cadre-photo",
@@ -283,7 +271,7 @@
    "color": 9073496
   },
   {
-   "id": "x21",
+   "id": "x20",
    "type": "object",
    "catalogId": "bol",
    "label": "bol",
@@ -297,7 +285,7 @@
    "color": 13616046
   },
   {
-   "id": "x22",
+   "id": "x21",
    "type": "object",
    "catalogId": "livres-deb",
    "label": "livres-deb",
@@ -311,7 +299,7 @@
    "color": 8216394
   },
   {
-   "id": "x23",
+   "id": "x22",
    "type": "object",
    "catalogId": "vase-boule",
    "label": "vase-boule",
@@ -325,7 +313,7 @@
    "color": 12892582
   },
   {
-   "id": "x24",
+   "id": "x23",
    "type": "object",
    "catalogId": "horloge",
    "label": "horloge",
@@ -339,82 +327,54 @@
    "color": 14209734
   },
   {
-   "id": "x25",
-   "type": "object",
-   "catalogId": "vase-boule",
-   "label": "vase-boule",
-   "x": 6.05,
-   "y": 1.29,
-   "wood": "chene-dore",
-   "w": 0.18,
-   "h": 0.18,
-   "d": 0.18,
-   "z": 0.125,
-   "color": 12892582
-  },
-  {
-   "id": "x26",
-   "type": "object",
-   "catalogId": "horloge",
-   "label": "horloge",
-   "x": 6.37,
-   "y": 1.29,
-   "wood": "chene-dore",
-   "w": 0.25,
-   "h": 0.25,
-   "d": 0.06,
-   "z": 0.1,
-   "color": 14209734
-  },
-  {
-   "id": "x27",
+   "id": "x24",
    "type": "object",
    "catalogId": "lanterne",
    "label": "lanterne",
-   "x": 6.8,
-   "y": 2.39,
+   "x": 6.15,
+   "y": 1.395,
    "wood": "chene-dore",
    "w": 0.16,
    "h": 0.4,
    "d": 0.16,
-   "z": 0.125,
+   "z": 0.15,
    "color": 4867391
   },
   {
-   "id": "x28",
+   "id": "x25",
    "type": "object",
-   "catalogId": "livres-pile",
-   "label": "livres-pile",
-   "x": 7.35,
-   "y": 2.39,
+   "catalogId": "panier",
+   "label": "panier",
+   "x": 6.75,
+   "y": 1.395,
    "wood": "chene-dore",
-   "w": 0.22,
-   "h": 0.16,
-   "d": 0.15,
-   "z": 0.16,
-   "color": 9072476
+   "w": 0.3,
+   "h": 0.22,
+   "d": 0.3,
+   "z": 0.15,
+   "color": 12425834
   },
   {
-   "id": "x29",
+   "id": "x26",
    "type": "object",
-   "catalogId": "vase-long",
-   "label": "vase-long",
-   "x": 7.8,
-   "y": 2.39,
+   "catalogId": "livres-deb",
+   "label": "livres-deb",
+   "x": 7.45,
+   "y": 1.395,
    "wood": "chene-dore",
-   "w": 0.11,
-   "h": 0.45,
-   "d": 0.11,
-   "z": 0.125,
-   "color": 12167570
+   "w": 0.3,
+   "h": 0.22,
+   "d": 0.16,
+   "z": 0.17,
+   "color": 8216394
   },
   {
-   "id": "x30",
+   "id": "x27",
    "type": "frame",
    "catalogId": "f-graine",
    "label": "Tableau graine",
-   "x": 4.28,
-   "y": 2.75,
+   "x": 0.6,
+   "y": 3.0,
    "wood": "chene-nature",
    "w": 0.95,
    "h": 1.22,
@@ -423,12 +383,12 @@
    "artSeed": 0
   },
   {
-   "id": "x31",
+   "id": "x28",
    "type": "frame",
    "catalogId": "f-danse",
    "label": "Tableau danse",
-   "x": 6.05,
-   "y": 2.95,
+   "x": 6.7,
+   "y": 2.55,
    "wood": "chene-nature",
    "w": 1.2,
    "h": 0.9,
@@ -437,21 +397,7 @@
    "artSeed": 0
   },
   {
-   "id": "x32",
-   "type": "frame",
-   "catalogId": "f600x800",
-   "label": "60 × 80",
-   "x": 0.6,
-   "y": 3.0,
-   "wood": "chene-nature",
-   "w": 0.6,
-   "h": 0.8,
-   "d": 0.05,
-   "art": "galet",
-   "artSeed": 2
-  },
-  {
-   "id": "x33",
+   "id": "x29",
    "type": "object",
    "catalogId": "plante-g",
    "label": "plante-g",

@@ -63,14 +63,16 @@ function buildWall() {
   WALL_OUTLINE.forEach(([x, y], i) => (i ? shape.lineTo(x, y) : shape.moveTo(x, y)));
   shape.closePath();
 
-  const door = FIXTURES.find((f) => f.id === 'porte');
-  const hole = new THREE.Path();
-  hole.moveTo(door.x0, 0);
-  hole.lineTo(door.x0, door.y1);
-  hole.lineTo(door.x1, door.y1);
-  hole.lineTo(door.x1, 0);
-  hole.closePath();
-  shape.holes.push(hole);
+  // Toute ouverture perce le mur : la porte comme la fenêtre.
+  for (const f of FIXTURES.filter((o) => o.kind === 'door' || o.kind === 'window')) {
+    const hole = new THREE.Path();
+    hole.moveTo(f.x0, f.y0);
+    hole.lineTo(f.x0, f.y1);
+    hole.lineTo(f.x1, f.y1);
+    hole.lineTo(f.x1, f.y0);
+    hole.closePath();
+    shape.holes.push(hole);
+  }
 
   const geo = new THREE.ExtrudeGeometry(shape, { depth: WALL.thickness, bevelEnabled: false });
   geo.translate(0, 0, -WALL.thickness);
@@ -142,60 +144,43 @@ function buildEnvelope(group) {
 }
 
 /**
- * Vitrine : une carcasse ouverte plutôt qu'un bloc plein, pour qu'on voie
- * qu'elle est garnie. Bas fermé, trois tablettes d'objets, montant central
- * et deux battants vitrés.
+ * Fenêtre du mur rouge : le jour au fond, un dormant et un meneau central.
+ * Pas de paysage derrière, une surface claire suffit à lire le dehors.
  */
-function buildVitrine(f, y1) {
+function buildFenetre(f) {
   const g = new THREE.Group();
   g.name = 'fixture:' + f.id;
-  const bois = mat(0x7a5a3c, 0.62);
-  const fond = mat(0x5d442c, 0.8);
   const w = f.x1 - f.x0;
+  const h = f.y1 - f.y0;
   const cx = (f.x0 + f.x1) / 2;
-  const put = (mesh, x, y, z) => { mesh.position.set(x, y, z); g.add(mesh); return mesh; };
+  const cy = (f.y0 + f.y1) / 2;
 
-  put(box(w, y1, 0.04, fond), cx, y1 / 2, 0.02);                    // fond
-  put(box(0.05, y1, f.d, bois), f.x0 + 0.025, y1 / 2, f.d / 2);      // joue gauche
-  put(box(0.05, y1, f.d, bois), f.x1 - 0.025, y1 / 2, f.d / 2);      // joue droite
-  put(box(w, 0.07, f.d, bois), cx, y1 - 0.035, f.d / 2);             // dessus
-  put(box(w, 0.55, f.d, bois), cx, 0.275, f.d / 2);                  // bas fermé
-  put(box(0.05, y1 - 0.55, 0.05, bois), cx, 0.55 + (y1 - 0.55) / 2, f.d - 0.03);  // montant central
+  const jour = new THREE.Mesh(
+    new THREE.PlaneGeometry(w, h),
+    new THREE.MeshBasicMaterial({ color: 0xeef2f2 })
+  );
+  jour.position.set(cx, cy, -WALL.thickness - 0.01);
+  g.add(jour);
 
-  // Tablettes et leur garniture
-  const objets = mat(0xcfc3ae, 0.85);
-  const livres = mat(0x8a6f5c, 0.8);
-  const verre = mat(0xb7c2bd, 0.35);
-  for (const [ty, contenu] of [
-    [0.95, [[-0.46, 0.22, 0.16, livres], [-0.10, 0.15, 0.13, objets], [0.34, 0.26, 0.11, verre]]],
-    [1.38, [[-0.38, 0.17, 0.12, objets], [0.02, 0.24, 0.15, livres], [0.44, 0.19, 0.13, objets]]],
-    [1.80, [[-0.30, 0.20, 0.14, verre], [0.20, 0.16, 0.18, livres]]],
-  ]) {
-    put(box(w - 0.12, 0.03, f.d - 0.10, bois), cx, ty, f.d / 2);
-    for (const [dx, h, bw, material] of contenu) {
-      put(box(bw, h, 0.13, material), cx + dx, ty + 0.015 + h / 2, f.d * 0.45);
-    }
-  }
-
-  // Battants vitrés, de part et d'autre du montant
-  const glass = new THREE.MeshStandardMaterial({
-    color: 0x9fb0ab, roughness: 0.1, metalness: 0.1, transparent: true, opacity: 0.28,
-  });
-  const bw = (w - 0.16) / 2;
-  for (const dir of [-1, 1]) {
-    const p = box(bw, y1 - 0.62, 0.012, glass);
-    p.castShadow = false;
-    put(p, cx + dir * (bw / 2 + 0.035), 0.55 + (y1 - 0.62) / 2, f.d - 0.008);
-  }
+  const dormant = mat(0x4a453f, 0.7);
+  const barre = (bw, bh, bx, by) => {
+    const m = box(bw, bh, 0.07, dormant);
+    m.position.set(bx, by, 0.01);
+    g.add(m);
+  };
+  barre(w + 0.08, 0.06, cx, f.y0 - 0.02);
+  barre(w + 0.08, 0.06, cx, f.y1 + 0.02);
+  barre(0.06, h + 0.08, f.x0 - 0.02, cy);
+  barre(0.06, h + 0.08, f.x1 + 0.02, cy);
+  barre(0.05, h, cx, cy);                    // meneau central
   return g;
 }
 
-/** Volumes existants : meuble bas, cheminée, vitrine, porte… */
+/** Volumes existants : meuble bas, cheminée, fenêtre, porte… */
 function buildFixtures(group) {
   const mats = {
     wood:    mat(0x8a6a4a, 0.7),
     white:   mat(COLORS.white, 0.85),
-    cabinet: mat(0x7a5a3c, 0.62),
     firebox: new THREE.MeshStandardMaterial({ color: 0x1b1917, roughness: 0.4, metalness: 0.35 }),
     door:    mat(0x6e4a30, 0.75),
   };
@@ -209,8 +194,8 @@ function buildFixtures(group) {
       group.add(d);
       continue;
     }
-    if (f.id === 'vitrine') {
-      group.add(buildVitrine(f, y1));
+    if (f.kind === 'window') {
+      group.add(buildFenetre(f));
       continue;
     }
 

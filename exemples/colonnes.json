@@ -1,7 +1,7 @@
 {
  "format": "projo-biblio",
  "version": 1,
- "savedAt": "2026-09-07T09:00:00.000Z",
+ "savedAt": "2026-09-23T09:00:00.000Z",
  "name": "Deux colonnes",
  "description": "Deux piles cadrées de part et d'autre du grand tableau.",
  "settings": {
@@ -81,41 +81,53 @@
   {
    "id": "x06",
    "type": "shelf",
-   "catalogId": "s1200",
-   "label": "Courante",
-   "x": 6.05,
-   "y": 1.05,
+   "catalogId": "s1800",
+   "label": "Grande",
+   "x": 6.85,
+   "y": 1.25,
    "wood": "chene-dore",
-   "w": 1.05,
-   "d": 0.25,
-   "t": 0.04
+   "w": 1.8,
+   "d": 0.3,
+   "t": 0.045
   },
   {
    "id": "x07",
    "type": "shelf",
-   "catalogId": "s1200",
-   "label": "Courante",
-   "x": 6.02,
-   "y": 2.1,
+   "catalogId": "s1800",
+   "label": "Grande",
+   "x": 6.85,
+   "y": 1.85,
    "wood": "chene-dore",
-   "w": 1.1,
-   "d": 0.25,
-   "t": 0.04
+   "w": 1.8,
+   "d": 0.28,
+   "t": 0.045
   },
   {
    "id": "x08",
    "type": "shelf",
    "catalogId": "s1500",
    "label": "Moyenne",
-   "x": 7.3,
-   "y": 2.35,
+   "x": 6.6,
+   "y": 2.45,
    "wood": "chene-dore",
-   "w": 1.4,
+   "w": 1.5,
    "d": 0.25,
    "t": 0.04
   },
   {
    "id": "x09",
+   "type": "shelf",
+   "catalogId": "s1200",
+   "label": "Courante",
+   "x": 6.6,
+   "y": 3.05,
+   "wood": "chene-dore",
+   "w": 1.2,
+   "d": 0.25,
+   "t": 0.04
+  },
+  {
+   "id": "x10",
    "type": "object",
    "catalogId": "livres-deb",
    "label": "livres-deb",
@@ -129,7 +141,7 @@
    "color": 8216394
   },
   {
-   "id": "x10",
+   "id": "x11",
    "type": "object",
    "catalogId": "vase-haut",
    "label": "vase-haut",
@@ -143,7 +155,7 @@
    "color": 14208444
   },
   {
-   "id": "x11",
+   "id": "x12",
    "type": "object",
    "catalogId": "bol",
    "label": "bol",
@@ -157,7 +169,7 @@
    "color": 13616046
   },
   {
-   "id": "x12",
+   "id": "x13",
    "type": "object",
    "catalogId": "statuette",
    "label": "statuette",
@@ -171,7 +183,7 @@
    "color": 11905170
   },
   {
-   "id": "x13",
+   "id": "x14",
    "type": "object",
    "catalogId": "boite",
    "label": "boite",
@@ -185,7 +197,7 @@
    "color": 10259054
   },
   {
-   "id": "x14",
+   "id": "x15",
    "type": "object",
    "catalogId": "appareil",
    "label": "appareil",
@@ -199,7 +211,7 @@
    "color": 3814962
   },
   {
-   "id": "x15",
+   "id": "x16",
    "type": "object",
    "catalogId": "vase-boule",
    "label": "vase-boule",
@@ -213,7 +225,7 @@
    "color": 12892582
   },
   {
-   "id": "x16",
+   "id": "x17",
    "type": "object",
    "catalogId": "livres-pile",
    "label": "livres-pile",
@@ -227,7 +239,7 @@
    "color": 9072476
   },
   {
-   "id": "x17",
+   "id": "x18",
    "type": "object",
    "catalogId": "cadre-photo",
    "label": "cadre-photo",
@@ -241,82 +253,26 @@
    "color": 9073496
   },
   {
-   "id": "x18",
-   "type": "object",
-   "catalogId": "livres-pile",
-   "label": "livres-pile",
-   "x": 5.8,
-   "y": 1.09,
-   "wood": "chene-dore",
-   "w": 0.22,
-   "h": 0.16,
-   "d": 0.15,
-   "z": 0.16,
-   "color": 9072476
-  },
-  {
    "id": "x19",
    "type": "object",
-   "catalogId": "horloge",
-   "label": "horloge",
-   "x": 6.33,
-   "y": 1.09,
+   "catalogId": "panier",
+   "label": "panier",
+   "x": 6.3,
+   "y": 1.295,
    "wood": "chene-dore",
-   "w": 0.25,
-   "h": 0.25,
-   "d": 0.06,
-   "z": 0.1,
-   "color": 14209734
+   "w": 0.3,
+   "h": 0.22,
+   "d": 0.3,
+   "z": 0.15,
+   "color": 12425834
   },
   {
    "id": "x20",
    "type": "object",
-   "catalogId": "vase-long",
-   "label": "vase-long",
-   "x": 5.72,
-   "y": 2.14,
-   "wood": "chene-dore",
-   "w": 0.11,
-   "h": 0.45,
-   "d": 0.11,
-   "z": 0.125,
-   "color": 12167570
-  },
-  {
-   "id": "x21",
-   "type": "object",
-   "catalogId": "bol",
-   "label": "bol",
-   "x": 6.27,
-   "y": 2.14,
-   "wood": "chene-dore",
-   "w": 0.24,
-   "h": 0.09,
-   "d": 0.24,
-   "z": 0.13,
-   "color": 13616046
-  },
-  {
-   "id": "x22",
-   "type": "object",
-   "catalogId": "lanterne",
-   "label": "lanterne",
-   "x": 6.8,
-   "y": 2.39,
-   "wood": "chene-dore",
-   "w": 0.16,
-   "h": 0.4,
-   "d": 0.16,
-   "z": 0.125,
-   "color": 4867391
-  },
-  {
-   "id": "x23",
-   "type": "object",
    "catalogId": "livres-deb",
    "label": "livres-deb",
-   "x": 7.4,
-   "y": 2.39,
+   "x": 6.95,
+   "y": 1.295,
    "wood": "chene-dore",
    "w": 0.3,
    "h": 0.22,
@@ -325,7 +281,91 @@
    "color": 8216394
   },
   {
+   "id": "x21",
+   "type": "object",
+   "catalogId": "bol",
+   "label": "bol",
+   "x": 7.45,
+   "y": 1.295,
+   "wood": "chene-dore",
+   "w": 0.24,
+   "h": 0.09,
+   "d": 0.24,
+   "z": 0.14,
+   "color": 13616046
+  },
+  {
+   "id": "x22",
+   "type": "object",
+   "catalogId": "horloge",
+   "label": "horloge",
+   "x": 6.45,
+   "y": 1.895,
+   "wood": "chene-dore",
+   "w": 0.25,
+   "h": 0.25,
+   "d": 0.06,
+   "z": 0.1,
+   "color": 14209734
+  },
+  {
+   "id": "x23",
+   "type": "object",
+   "catalogId": "vase-long",
+   "label": "vase-long",
+   "x": 7.1,
+   "y": 1.895,
+   "wood": "chene-dore",
+   "w": 0.11,
+   "h": 0.45,
+   "d": 0.11,
+   "z": 0.14,
+   "color": 12167570
+  },
+  {
    "id": "x24",
+   "type": "object",
+   "catalogId": "lanterne",
+   "label": "lanterne",
+   "x": 6.15,
+   "y": 2.49,
+   "wood": "chene-dore",
+   "w": 0.16,
+   "h": 0.4,
+   "d": 0.16,
+   "z": 0.125,
+   "color": 4867391
+  },
+  {
+   "id": "x25",
+   "type": "object",
+   "catalogId": "livres-pile",
+   "label": "livres-pile",
+   "x": 6.8,
+   "y": 2.49,
+   "wood": "chene-dore",
+   "w": 0.22,
+   "h": 0.16,
+   "d": 0.15,
+   "z": 0.16,
+   "color": 9072476
+  },
+  {
+   "id": "x26",
+   "type": "object",
+   "catalogId": "vase-boule",
+   "label": "vase-boule",
+   "x": 6.6,
+   "y": 3.09,
+   "wood": "chene-dore",
+   "w": 0.18,
+   "h": 0.18,
+   "d": 0.18,
+   "z": 0.125,
+   "color": 12892582
+  },
+  {
+   "id": "x27",
    "type": "frame",
    "catalogId": "f-graine",
    "label": "Tableau graine",
@@ -339,12 +379,12 @@
    "artSeed": 0
   },
   {
-   "id": "x25",
+   "id": "x28",
    "type": "frame",
    "catalogId": "f-danse",
    "label": "Tableau danse",
-   "x": 6.05,
-   "y": 2.95,
+   "x": 0.6,
+   "y": 3.05,
    "wood": "chene-nature",
    "w": 1.2,
    "h": 0.9,
@@ -353,7 +393,7 @@
    "artSeed": 0
   },
   {
-   "id": "x26",
+   "id": "x29",
    "type": "frame",
    "catalogId": "f600x800",
    "label": "60 × 80",
@@ -367,7 +407,7 @@
    "artSeed": 1
   },
   {
-   "id": "x27",
+   "id": "x30",
    "type": "object",
    "catalogId": "plante-g",
    "label": "plante-g",

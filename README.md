@@ -20,11 +20,11 @@ SketchUp (`captures/dimensions-salon.png`) : **4,7519 mm par pixel**.
 | Hauteur au coin droit | 2 980 mm | relevé |
 | Porte (à gauche) | 1 000 × 2 100 mm | cote SketchUp « 1000 » |
 | Meuble bas | 3 000 × 700 mm | contrainte écrite |
-| Hotte de cheminée | 1 230 mm de large | cote portée sur l'élévation |
+| Hotte de cheminée | 1 230 mm de large, haute jusqu'à 2 510 | cote portée sur l'élévation |
 | Socle de cheminée | 500 mm de haut | cote SketchUp « 500 » |
-| Bas du conduit | 2 010 mm | cote SketchUp « 2000.2 » |
+| Bas du conduit | 2 510 mm | relevé 2 010, hotte rehaussée de 500 |
 | Range-bûches | 640 × 700 mm | contrainte écrite |
-| Vitrine | 1 464 × 2 268 mm | cotes SketchUp |
+| Fenêtre (ex-vitrine) | 1 600 × 500 mm, à 500 du sol | posée à 900 du retour de droite |
 
 Les trois dernières colonnes se recoupent à moins de 1,5 % près, ce qui valide
 l'échelle.
@@ -37,7 +37,7 @@ Reprises de la slide « Nos contraintes » :
 - D'où une **longueur minimale de 700 mm** par planche.
 - L'outil signale en rouge toute planche qui passe sous 70 cm, qui ne couvre
   pas deux montants exploitables, qui déborde du rampant, ou qui bute sur la
-  porte, la cheminée ou la vitrine.
+  porte, la cheminée ou la fenêtre.
 
 ### Ce que l'outil sait, et ce qu'il suppose
 
@@ -92,8 +92,7 @@ tableau existant (95 × 122).
   longueur, celle de devant la profondeur. `Maj` conserve les proportions,
   `Alt` ignore les aimants.
 - **Meubler** : un objet lâché au-dessus d'une planche s'y pose tout seul. Le
-  meuble bas, le range-bûches, le socle et le dessus de la vitrine portent des
-  objets au même titre. La poignée bleutée, ou le champ « Recul / mur »,
+  meuble bas, le range-bûches et le socle portent des objets au même titre. La poignée bleutée, ou le champ « Recul / mur »,
   avance ou recule l'objet sur son plateau. On ne peut rien poser dans le
   foyer, la hotte ni le conduit.
 - **Enregistrer** : bouton *Enregistrer* → fichier `.json`. Pour reprendre,

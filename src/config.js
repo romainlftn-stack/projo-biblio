@@ -44,14 +44,16 @@ export const FIXTURES = [
   { id: 'foyer-socle',label: 'Socle cheminée',      x0: 4.495, x1: 5.745, y0: 0,    y1: 0.50,  d: 0.42, kind: 'white',   blocks: true },
   { id: 'foyer',      label: 'Foyer',               x0: 4.60,  x1: 5.50,  y0: 0.50, y1: 1.39,  d: 0.38, kind: 'firebox', blocks: true },
   { id: 'linteau',    label: 'Linteau bois',        x0: 4.55,  x1: 5.57,  y0: 1.39, y1: 1.45,  d: 0.44, kind: 'wood',    blocks: true },
-  { id: 'hotte',      label: 'Hotte 1230',          x0: 4.505, x1: 5.735, y0: 1.45, y1: 2.01,  d: 0.50, kind: 'white',   blocks: true },
-  { id: 'conduit',    label: 'Conduit',             x0: 4.776, x1: 5.446, y0: 2.01, y1: null,  d: 0.35, kind: 'white',   blocks: true },
+  { id: 'hotte',      label: 'Hotte 1230',          x0: 4.505, x1: 5.735, y0: 1.45, y1: 2.51,  d: 0.50, kind: 'white',   blocks: true },
+  { id: 'conduit',    label: 'Conduit',             x0: 4.776, x1: 5.446, y0: 2.51, y1: null,  d: 0.35, kind: 'white',   blocks: true },
   { id: 'buches',     label: 'Range-bûches 640×700',x0: 5.76,  x1: 6.40,  y0: 0,    y1: 0.70,  d: 0.45, kind: 'wood',    blocks: false },
-  { id: 'vitrine',    label: 'Vitrine 1464×2268',   x0: 6.61,  x1: 8.074, y0: 0,    y1: 2.268, d: 0.50, kind: 'cabinet', blocks: true },
+  // Fenêtre relevée derrière l'ancienne vitrine : 1600 × 500, à 500 du sol et
+  // à 900 du retour de droite. C'est elle que la bibliothèque masquait.
+  { id: 'fenetre',    label: 'Fenêtre 1600×500',    x0: 5.64,  x1: 7.24,  y0: 0.50, y1: 1.00,  d: 0.06, kind: 'window',  blocks: true },
 ];
 
 /** Meubles offrant un plateau où poser des objets : [id, hauteur, profondeur]. */
-export const SUPPORT_TOPS = ['meuble-bas', 'buches', 'foyer-socle', 'vitrine'];
+export const SUPPORT_TOPS = ['meuble-bas', 'buches', 'foyer-socle'];
 
 /** Tableaux déjà en place sur le mur (repris de l'élévation). */
 export const EXISTING_ART = [
