@@ -81,12 +81,12 @@
   {
    "id": "x06",
    "type": "shelf",
-   "catalogId": "s1800",
-   "label": "Grande",
+   "catalogId": "s2100",
+   "label": "XL",
    "x": 6.85,
-   "y": 1.25,
+   "y": 2.25,
    "wood": "chene-dore",
-   "w": 1.8,
+   "w": 2.1,
    "d": 0.3,
    "t": 0.045
   },
@@ -96,7 +96,7 @@
    "catalogId": "s1800",
    "label": "Grande",
    "x": 6.85,
-   "y": 1.85,
+   "y": 2.8,
    "wood": "chene-dore",
    "w": 1.8,
    "d": 0.28,
@@ -105,29 +105,17 @@
   {
    "id": "x08",
    "type": "shelf",
-   "catalogId": "s1500",
-   "label": "Moyenne",
-   "x": 6.6,
-   "y": 2.45,
-   "wood": "chene-dore",
-   "w": 1.5,
-   "d": 0.25,
-   "t": 0.04
-  },
-  {
-   "id": "x09",
-   "type": "shelf",
    "catalogId": "s1200",
    "label": "Courante",
-   "x": 6.6,
-   "y": 3.05,
+   "x": 6.4,
+   "y": 3.25,
    "wood": "chene-dore",
    "w": 1.2,
    "d": 0.25,
    "t": 0.04
   },
   {
-   "id": "x10",
+   "id": "x09",
    "type": "object",
    "catalogId": "livres-deb",
    "label": "livres-deb",
@@ -141,7 +129,7 @@
    "color": 8216394
   },
   {
-   "id": "x11",
+   "id": "x10",
    "type": "object",
    "catalogId": "vase-haut",
    "label": "vase-haut",
@@ -155,7 +143,7 @@
    "color": 14208444
   },
   {
-   "id": "x12",
+   "id": "x11",
    "type": "object",
    "catalogId": "bol",
    "label": "bol",
@@ -169,7 +157,7 @@
    "color": 13616046
   },
   {
-   "id": "x13",
+   "id": "x12",
    "type": "object",
    "catalogId": "statuette",
    "label": "statuette",
@@ -183,7 +171,7 @@
    "color": 11905170
   },
   {
-   "id": "x14",
+   "id": "x13",
    "type": "object",
    "catalogId": "boite",
    "label": "boite",
@@ -197,7 +185,7 @@
    "color": 10259054
   },
   {
-   "id": "x15",
+   "id": "x14",
    "type": "object",
    "catalogId": "appareil",
    "label": "appareil",
@@ -211,7 +199,7 @@
    "color": 3814962
   },
   {
-   "id": "x16",
+   "id": "x15",
    "type": "object",
    "catalogId": "vase-boule",
    "label": "vase-boule",
@@ -225,7 +213,7 @@
    "color": 12892582
   },
   {
-   "id": "x17",
+   "id": "x16",
    "type": "object",
    "catalogId": "livres-pile",
    "label": "livres-pile",
@@ -239,7 +227,7 @@
    "color": 9072476
   },
   {
-   "id": "x18",
+   "id": "x17",
    "type": "object",
    "catalogId": "cadre-photo",
    "label": "cadre-photo",
@@ -253,12 +241,12 @@
    "color": 9073496
   },
   {
-   "id": "x19",
+   "id": "x18",
    "type": "object",
    "catalogId": "panier",
    "label": "panier",
-   "x": 6.3,
-   "y": 1.295,
+   "x": 6.15,
+   "y": 2.295,
    "wood": "chene-dore",
    "w": 0.3,
    "h": 0.22,
@@ -267,40 +255,40 @@
    "color": 12425834
   },
   {
-   "id": "x20",
+   "id": "x19",
    "type": "object",
    "catalogId": "livres-deb",
    "label": "livres-deb",
-   "x": 6.95,
-   "y": 1.295,
+   "x": 6.85,
+   "y": 2.295,
    "wood": "chene-dore",
    "w": 0.3,
    "h": 0.22,
    "d": 0.16,
-   "z": 0.15,
+   "z": 0.17,
    "color": 8216394
   },
   {
-   "id": "x21",
+   "id": "x20",
    "type": "object",
    "catalogId": "bol",
    "label": "bol",
-   "x": 7.45,
-   "y": 1.295,
+   "x": 7.55,
+   "y": 2.295,
    "wood": "chene-dore",
    "w": 0.24,
    "h": 0.09,
    "d": 0.24,
-   "z": 0.14,
+   "z": 0.15,
    "color": 13616046
   },
   {
-   "id": "x22",
+   "id": "x21",
    "type": "object",
    "catalogId": "horloge",
    "label": "horloge",
-   "x": 6.45,
-   "y": 1.895,
+   "x": 6.3,
+   "y": 2.845,
    "wood": "chene-dore",
    "w": 0.25,
    "h": 0.25,
@@ -309,12 +297,12 @@
    "color": 14209734
   },
   {
-   "id": "x23",
+   "id": "x22",
    "type": "object",
    "catalogId": "vase-long",
    "label": "vase-long",
-   "x": 7.1,
-   "y": 1.895,
+   "x": 6.95,
+   "y": 2.845,
    "wood": "chene-dore",
    "w": 0.11,
    "h": 0.45,
@@ -323,26 +311,12 @@
    "color": 12167570
   },
   {
-   "id": "x24",
-   "type": "object",
-   "catalogId": "lanterne",
-   "label": "lanterne",
-   "x": 6.15,
-   "y": 2.49,
-   "wood": "chene-dore",
-   "w": 0.16,
-   "h": 0.4,
-   "d": 0.16,
-   "z": 0.125,
-   "color": 4867391
-  },
-  {
-   "id": "x25",
+   "id": "x23",
    "type": "object",
    "catalogId": "livres-pile",
    "label": "livres-pile",
-   "x": 6.8,
-   "y": 2.49,
+   "x": 7.45,
+   "y": 2.845,
    "wood": "chene-dore",
    "w": 0.22,
    "h": 0.16,
@@ -351,12 +325,12 @@
    "color": 9072476
   },
   {
-   "id": "x26",
+   "id": "x24",
    "type": "object",
    "catalogId": "vase-boule",
    "label": "vase-boule",
-   "x": 6.6,
-   "y": 3.09,
+   "x": 6.2,
+   "y": 3.29,
    "wood": "chene-dore",
    "w": 0.18,
    "h": 0.18,
@@ -365,7 +339,21 @@
    "color": 12892582
   },
   {
-   "id": "x27",
+   "id": "x25",
+   "type": "object",
+   "catalogId": "bougeoir",
+   "label": "bougeoir",
+   "x": 6.65,
+   "y": 3.29,
+   "wood": "chene-dore",
+   "w": 0.09,
+   "h": 0.25,
+   "d": 0.09,
+   "z": 0.125,
+   "color": 10127986
+  },
+  {
+   "id": "x26",
    "type": "frame",
    "catalogId": "f-graine",
    "label": "Tableau graine",
@@ -379,7 +367,7 @@
    "artSeed": 0
   },
   {
-   "id": "x28",
+   "id": "x27",
    "type": "frame",
    "catalogId": "f-danse",
    "label": "Tableau danse",
@@ -393,7 +381,7 @@
    "artSeed": 0
   },
   {
-   "id": "x29",
+   "id": "x28",
    "type": "frame",
    "catalogId": "f600x800",
    "label": "60 × 80",
@@ -407,7 +395,7 @@
    "artSeed": 1
   },
   {
-   "id": "x30",
+   "id": "x29",
    "type": "object",
    "catalogId": "plante-g",
    "label": "plante-g",

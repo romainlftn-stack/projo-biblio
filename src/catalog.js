@@ -67,6 +67,7 @@ export const OBJECTS = [
   { id: 'cadre-photo', label: 'Cadre photo',      w: 0.13, h: 0.18, d: 0.03, shape: 'frame',   color: 0x8a7358 },
   { id: 'panier',      label: 'Panier',           w: 0.30, h: 0.22, d: 0.30, shape: 'basket',  color: 0xbd9a6a },
   { id: 'lanterne',    label: 'Lanterne',         w: 0.16, h: 0.40, d: 0.16, shape: 'lantern', color: 0x4a453f },
+  { id: 'range-buches',label: 'Range-bûches',     w: 0.64, h: 0.70, d: 0.45, shape: 'logstore', color: 0x8a6a4a, note: '640 × 700' },
   { id: 'silhouette',  label: 'Silhouette 1 m 70',w: 0.45, h: 1.70, d: 0.25, shape: 'human',   color: 0x6f7d86, ref: true },
 ];
 

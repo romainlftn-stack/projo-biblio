@@ -23,8 +23,8 @@ SketchUp (`captures/dimensions-salon.png`) : **4,7519 mm par pixel**.
 | Hotte de cheminée | 1 230 mm de large, haute jusqu'à 2 510 | cote portée sur l'élévation |
 | Socle de cheminée | 500 mm de haut | cote SketchUp « 500 » |
 | Bas du conduit | 2 510 mm | relevé 2 010, hotte rehaussée de 500 |
-| Range-bûches | 640 × 700 mm | contrainte écrite |
-| Fenêtre (ex-vitrine) | 1 600 × 500 mm, à 500 du sol | posée à 900 du retour de droite |
+| Range-bûches | 640 × 700 mm | contrainte écrite — devenu un objet déplaçable |
+| Fenêtre (ex-vitrine) | 500 × 1 600 mm, à 500 du sol | bord droit à 900 du retour |
 
 Les trois dernières colonnes se recoupent à moins de 1,5 % près, ce qui valide
 l'échelle.
@@ -92,7 +92,8 @@ tableau existant (95 × 122).
   longueur, celle de devant la profondeur. `Maj` conserve les proportions,
   `Alt` ignore les aimants.
 - **Meubler** : un objet lâché au-dessus d'une planche s'y pose tout seul. Le
-  meuble bas, le range-bûches et le socle portent des objets au même titre. La poignée bleutée, ou le champ « Recul / mur »,
+  meuble bas et le socle de cheminée portent des objets au même titre, et le
+  sol accueille les meubles posés, comme le range-bûches. La poignée bleutée, ou le champ « Recul / mur »,
   avance ou recule l'objet sur son plateau. On ne peut rien poser dans le
   foyer, la hotte ni le conduit.
 - **Enregistrer** : bouton *Enregistrer* → fichier `.json`. Pour reprendre,

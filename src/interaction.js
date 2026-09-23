@@ -170,6 +170,8 @@ export function supportingSurface(item, items) {
     if (fp.x1 < f.x0 + 0.02 || fp.x0 > f.x1 - 0.02) continue;
     consider(f.y1, f.d, f.id);
   }
+  // À défaut, le sol : sans lui, un meuble posé par terre ne se calerait sur rien.
+  if (!best) consider(0, 0.90, 'sol');
   return best;
 }
 

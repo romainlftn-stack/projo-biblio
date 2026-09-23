@@ -316,6 +316,28 @@ function buildShape(shape, w, h, d, material) {
       top.rotation.y = Math.PI / 4;
       break;
     }
+    case 'logstore': {
+      // Caisse ouverte sur l'avant, garnie de rondins vus en bout.
+      const ep = Math.min(0.035, w * 0.06);
+      const panneau = (pw, ph, pd, px, py, pz) => {
+        const m = add(mesh(new THREE.BoxGeometry(pw, ph, pd), material));
+        m.position.set(px, py, pz);
+      };
+      panneau(w, ep, d, 0, ep / 2, 0);                       // fond
+      panneau(w, h, ep, 0, h / 2, -d / 2 + ep / 2);          // dos
+      panneau(ep, h, d, -w / 2 + ep / 2, h / 2, 0);          // joue gauche
+      panneau(ep, h, d, w / 2 - ep / 2, h / 2, 0);           // joue droite
+      panneau(w, ep, d, 0, h - ep / 2, 0);                   // dessus
+      const bois = new THREE.MeshStandardMaterial({ color: 0xa8895f, roughness: 0.92 });
+      const r = Math.min(w, h) * 0.085;
+      for (let i = 0; i < 9; i++) {
+        const bu = add(mesh(new THREE.CylinderGeometry(r, r, d * 0.8, 9), bois));
+        bu.rotation.x = Math.PI / 2;
+        bu.position.set(-w / 2 + ep + r * 1.3 + (i % 3) * r * 2.4,
+                        ep + r * 1.2 + Math.floor(i / 3) * r * 2.1, 0);
+      }
+      break;
+    }
     case 'human': {
       const skin = new THREE.MeshStandardMaterial({ color: 0x6f7d86, roughness: 0.9, transparent: true, opacity: 0.5 });
       const torso = add(mesh(new THREE.CapsuleGeometry(w * 0.26, h * 0.34, 4, 12), skin));
