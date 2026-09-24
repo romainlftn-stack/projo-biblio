@@ -19,7 +19,7 @@ SketchUp (`captures/dimensions-salon.png`) : **4,7519 mm par pixel**.
 | Hauteur au faîtage (à 2 690 mm du coin gauche) | 4 850 mm | relevé |
 | Hauteur au coin droit | 2 980 mm | relevé |
 | Porte (à gauche) | 1 000 × 2 100 mm | cote SketchUp « 1000 » |
-| Meuble bas | 3 000 × 700 mm | contrainte écrite |
+| Meuble bas | 3 000 × 900 mm | longueur de la contrainte écrite, hauteur revue |
 | Hotte de cheminée | 1 230 mm de large, haute jusqu'à 2 510 | cote portée sur l'élévation |
 | Socle de cheminée | 500 mm de haut | cote SketchUp « 500 » |
 | Bas du conduit | 2 510 mm | relevé 2 010, hotte rehaussée de 500 |

@@ -40,7 +40,7 @@ export const WALL_OUTLINE = [
  */
 export const FIXTURES = [
   { id: 'porte',      label: 'Porte',              x0: 0.05,  x1: 1.08,  y0: 0,    y1: 2.10,  d: 0.06, kind: 'door',    blocks: true },
-  { id: 'meuble-bas', label: 'Meuble bas 3000×700', x0: 1.08,  x1: 4.08,  y0: 0,    y1: 0.70,  d: 0.45, kind: 'wood',    blocks: false },
+  { id: 'meuble-bas', label: 'Meuble bas 3000×900', x0: 1.08,  x1: 4.08,  y0: 0,    y1: 0.90,  d: 0.45, kind: 'wood',    blocks: false },
   { id: 'foyer-socle',label: 'Socle cheminée',      x0: 4.495, x1: 5.745, y0: 0,    y1: 0.50,  d: 0.42, kind: 'white',   blocks: true },
   { id: 'foyer',      label: 'Foyer',               x0: 4.60,  x1: 5.50,  y0: 0.50, y1: 1.39,  d: 0.38, kind: 'firebox', blocks: true },
   { id: 'linteau',    label: 'Linteau bois',        x0: 4.55,  x1: 5.57,  y0: 1.39, y1: 1.45,  d: 0.44, kind: 'wood',    blocks: true },
